@@ -22,8 +22,8 @@ func NewDatabase(path string) (*Database, error) {
 	return db, nil
 }
 
-// getKey retrieves the value associated with the provided key from the BadgerDB instance.
-func (d *Database) getKey(key string) ([]byte, error) {
+// GetKey retrieves the value associated with the provided key from the BadgerDB instance.
+func (d *Database) GetKey(key string) ([]byte, error) {
 	var valCopy []byte
 	err := d.db.View(func(txn *badger.Txn) error {
 		val, err := txn.Get([]byte(key))
@@ -46,8 +46,8 @@ func (d *Database) getKey(key string) ([]byte, error) {
 	return valCopy, nil
 }
 
-// setKey sets the value associated with the provided key in the BadgerDB instance
-func (d *Database) setKey(key string, value string) error {
+// SetKey sets the value associated with the provided key in the BadgerDB instance
+func (d *Database) SetKey(key string, value string) error {
 	err := d.db.Update(func(txn *badger.Txn) error {
 		e := badger.NewEntry([]byte(key), []byte(value))
 		if err := txn.SetEntry(e); err != nil {
@@ -62,9 +62,9 @@ func (d *Database) setKey(key string, value string) error {
 	return nil
 }
 
-// deleteKey removes the key-value pair associated with the provided key from the BadgerDB instance
-func (d *Database) deleteKey(key string) error {
-	_, err := d.getKey(key)
+// DeleteKey removes the key-value pair associated with the provided key from the BadgerDB instance
+func (d *Database) DeleteKey(key string) error {
+	_, err := d.GetKey(key)
 	if err == badger.ErrKeyNotFound {
 		return fmt.Errorf("key '%s' not found, cannot delete", key)
 	} else if err != nil {

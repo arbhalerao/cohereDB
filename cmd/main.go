@@ -2,7 +2,8 @@ package main
 
 import (
 	"github.com/Aditya-Bhalerao/cohereDB/db"
-	utils "github.com/Aditya-Bhalerao/cohereDB/utils"
+	"github.com/Aditya-Bhalerao/cohereDB/utils"
+	"github.com/Aditya-Bhalerao/cohereDB/web"
 )
 
 type ServiceConfig struct {
@@ -27,9 +28,18 @@ func main() {
 		return
 	}
 
-	_, err = db.NewDatabase(badgerConfig.BADGER_DB_PATH)
+	db, err := db.NewDatabase(badgerConfig.BADGER_DB_PATH)
 	if err != nil {
 		utils.Logger.Error().Err(err).Msg("Failed to initialize database")
 		return
 	}
+
+	server := web.NewServer(db, serviceConfig.HTTP_ADDR)
+	server.RegisterHandlers()
+
+	utils.Logger.Info().Msg("Starting server...")
+	if err := server.Start(); err != nil {
+		utils.Logger.Fatal().Err(err).Msg("Server failed")
+	}
+
 }
