@@ -1,0 +1,30 @@
+# Global settings
+base_host = "localhost"
+default_timeout = 30
+
+[[servers]]
+id = "server1"
+index = 0
+host = base_host
+port = 8080
+environment = "development"
+health_check_url = "/health"
+timeout = default_timeout
+
+[[servers]]
+id = "server2"
+index = 1
+host = base_host
+port = 8081
+environment = "development"
+health_check_url = "/health"
+timeout = default_timeout
+
+[[servers]]
+id = "server3"
+index = 2
+host = base_host
+port = 8082
+environment = "development"
+health_check_url = "/health"
+timeout = default_timeout
