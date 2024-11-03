@@ -12,7 +12,14 @@ import (
 // GetHandler handles read requests
 func (s *Server) GetHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	r.ParseForm()
+
+	err := r.ParseForm()
+	if err != nil {
+		utils.Logger.Error().Msgf("[GET] Error parsing form data")
+		http.Error(w, fmt.Sprintf(`{"error": "Failed to forward request: %s"}`, err.Error()), http.StatusInternalServerError)
+		return
+	}
+
 	key := r.Form.Get("key")
 
 	targetShard := s.getShard(key)
@@ -27,7 +34,12 @@ func (s *Server) GetHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		defer resp.Body.Close()
-		io.Copy(w, resp.Body)
+		_, err = io.Copy(w, resp.Body)
+		if err != nil {
+			utils.Logger.Error().Msgf("[GET] Error writing response for key '%s': %v", key, err)
+			http.Error(w, `{"error": "Failed to write response"}`, http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
@@ -46,12 +58,23 @@ func (s *Server) GetHandler(w http.ResponseWriter, r *http.Request) {
 	utils.Logger.Info().Msgf("[GET] Successfully retrieved key %s from shard %d", key, s.shardIdx)
 
 	response := fmt.Sprintf(`{%q}`, value)
-	w.Write([]byte(response))
+	_, err = w.Write([]byte(response))
+	if err != nil {
+		utils.Logger.Error().Msgf("Error writing response for key '%s': %v", key, err)
+		return
+	}
 }
 
 func (s *Server) SetHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	r.ParseForm()
+
+	err := r.ParseForm()
+	if err != nil {
+		utils.Logger.Error().Msgf("[SET] Error parsing form data")
+		http.Error(w, fmt.Sprintf(`{"error": "Failed to forward request: %s"}`, err.Error()), http.StatusInternalServerError)
+		return
+	}
+
 	key := r.Form.Get("key")
 	value := r.Form.Get("value")
 
@@ -68,11 +91,16 @@ func (s *Server) SetHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		defer resp.Body.Close()
-		io.Copy(w, resp.Body)
+		_, err = io.Copy(w, resp.Body)
+		if err != nil {
+			utils.Logger.Error().Msgf("[SET] Error writing response for key '%s': %v", key, err)
+			http.Error(w, `{"error": "Failed to write response"}`, http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
-	err := s.db.SetKey(key, value)
+	err = s.db.SetKey(key, value)
 	if err != nil {
 		utils.Logger.Error().Msgf("[SET] Error setting key %s on shard %d: %v", key, s.shardIdx, err)
 		http.Error(w, fmt.Sprintf(`{"error": "Failed to set key '%s': %v"}`, key, err), http.StatusInternalServerError)
@@ -82,12 +110,23 @@ func (s *Server) SetHandler(w http.ResponseWriter, r *http.Request) {
 	utils.Logger.Info().Msgf("[SET] Successfully set key %s on shard %d", key, s.shardIdx)
 
 	response := fmt.Sprintf(`{"message": "Key '%s' set successfully"}`, key)
-	w.Write([]byte(response))
+	_, err = w.Write([]byte(response))
+	if err != nil {
+		utils.Logger.Error().Msgf("Error writing response for key '%s': %v", key, err)
+		return
+	}
 }
 
 func (s *Server) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	r.ParseForm()
+
+	err := r.ParseForm()
+	if err != nil {
+		utils.Logger.Error().Msgf("[DELETE] Error parsing form data")
+		http.Error(w, fmt.Sprintf(`{"error": "Failed to forward request: %s"}`, err.Error()), http.StatusInternalServerError)
+		return
+	}
+
 	key := r.Form.Get("key")
 
 	targetShard := s.getShard(key)
@@ -103,11 +142,16 @@ func (s *Server) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		defer resp.Body.Close()
-		io.Copy(w, resp.Body)
+		_, err = io.Copy(w, resp.Body)
+		if err != nil {
+			utils.Logger.Error().Msgf("[DELETE] Error writing response for key '%s': %v", key, err)
+			http.Error(w, `{"error": "Failed to write response"}`, http.StatusInternalServerError)
+			return
+		}
 		return
 	}
 
-	err := s.db.DeleteKey(key)
+	err = s.db.DeleteKey(key)
 	if err != nil {
 		if err == badger.ErrKeyNotFound {
 			utils.Logger.Error().Msgf("[DELETE] Key %s not found in shard %d", key, s.shardIdx)
@@ -122,5 +166,9 @@ func (s *Server) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	utils.Logger.Info().Msgf("[DELETE] Successfully deleted key %s from shard %d", key, s.shardIdx)
 
 	response := fmt.Sprintf(`{"message": "Key '%s' deleted successfully"}`, key)
-	w.Write([]byte(response))
+	_, err = w.Write([]byte(response))
+	if err != nil {
+		utils.Logger.Error().Msgf("Error writing response for key '%s': %v", key, err)
+		return
+	}
 }
