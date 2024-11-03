@@ -2,12 +2,14 @@ package db
 
 import (
 	"fmt"
+	"os"
 
 	badger "github.com/dgraph-io/badger/v4"
 )
 
 type Database struct {
-	db *badger.DB
+	db     *badger.DB
+	dbPath string
 }
 
 // NewDatabase returns a Database struct containing a BadgerDB instance
@@ -17,9 +19,33 @@ func NewDatabase(path string) (*Database, error) {
 		return nil, fmt.Errorf("failed to open Badger database at %s: %v", path, err)
 	}
 
-	db := &Database{db: badgerDb}
+	db := &Database{
+		db:     badgerDb,
+		dbPath: path,
+	}
 
 	return db, nil
+}
+
+// Close closes the database connection
+func (d *Database) Close() error {
+	if d.db != nil {
+		return d.db.Close()
+	}
+	return nil
+}
+
+// Cleanup closes the database connection and removes the database directory
+func (d *Database) Cleanup() error {
+	if err := d.Close(); err != nil {
+		return fmt.Errorf("failed to close database during cleanup: %v", err)
+	}
+
+	if err := os.RemoveAll(d.dbPath); err != nil {
+		return fmt.Errorf("failed to remove database directory during cleanup: %v", err)
+	}
+
+	return nil
 }
 
 // GetKey retrieves the value associated with the provided key from the BadgerDB instance.

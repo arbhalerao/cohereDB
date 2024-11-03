@@ -4,6 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/Aditya-Bhalerao/cohereDB/db"
 	"github.com/Aditya-Bhalerao/cohereDB/utils"
@@ -12,6 +15,7 @@ import (
 
 func main() {
 	configPath := flag.String("config", "", "Path to server config file (e.g., server0.toml)")
+	cleanup := flag.Bool("cleanup", false, "Clean up the database when server shuts down")
 	flag.Parse()
 
 	if *configPath == "" {
@@ -34,7 +38,8 @@ func main() {
 	}
 
 	// Initialize the database
-	dbInstance, err := db.NewDatabase(fmt.Sprintf("../data/db_%d", config.Server.Shard))
+	dbPath := fmt.Sprintf("../data/db_%d", config.Server.Shard)
+	dbInstance, err := db.NewDatabase(dbPath)
 	if err != nil {
 		utils.Logger.Error().Err(err).Msg("Failed to initialize database")
 		return
@@ -44,8 +49,37 @@ func main() {
 	server := web.NewServer(dbInstance, config.Server.Addr, config.Server.Shard, config.Database.ShardCount, &peerServers)
 	server.RegisterHandlers()
 
-	utils.Logger.Info().Msgf("Starting server at %s...", config.Server.Addr)
-	if err := server.Start(); err != nil {
+	// Setup graceful shutdown
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
+
+	serverErrors := make(chan error, 1)
+	go func() {
+		utils.Logger.Info().Msgf("Starting server at %s...", config.Server.Addr)
+		if err := server.Start(); err != nil {
+			serverErrors <- err
+		}
+	}()
+
+	select {
+	case err := <-serverErrors:
 		utils.Logger.Fatal().Err(err).Msg("Server failed")
+	case sig := <-signalChan:
+		utils.Logger.Info().Msgf("Received signal %s, initiating shutdown...", sig)
+
+		if *cleanup {
+			utils.Logger.Info().Msg("Cleanup flag set, cleaning up database...")
+			if err := dbInstance.Cleanup(); err != nil {
+				utils.Logger.Error().Err(err).Msg("Failed to cleanup database")
+			} else {
+				utils.Logger.Info().Msg("Database cleanup completed")
+			}
+		} else {
+			if err := dbInstance.Close(); err != nil {
+				utils.Logger.Error().Err(err).Msg("Error closing database")
+			}
+		}
+
+		utils.Logger.Info().Msg("Server shutdown completed")
 	}
 }
