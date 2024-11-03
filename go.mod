@@ -3,6 +3,7 @@ module github.com/Aditya-Bhalerao/cohereDB
 go 1.23.0
 
 require (
+	github.com/BurntSushi/toml v0.3.1
 	github.com/dgraph-io/badger/v4 v4.3.1
 	github.com/rs/zerolog v1.33.0
 )
