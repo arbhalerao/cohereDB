@@ -3,12 +3,13 @@ shard_count = 3
 
 [server]
 shard = 1
-addr = "localhost:52001"
+addr = "127.0.0.1:52001"
+container_addr = "127.0.0.1:8080"
 
 [[peer_servers]]
 shard = 0
-addr = "localhost:52000"
+addr = "127.0.0.1:52000"
 
 [[peer_servers]]
 shard = 2
-addr = "localhost:52002"
+addr = "127.0.0.1:52002"
