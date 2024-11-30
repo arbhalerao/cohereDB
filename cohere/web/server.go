@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Aditya-Bhalerao/cohereDB/db"
-	"github.com/Aditya-Bhalerao/cohereDB/utils"
+	"github.com/arbha1erao/cohereDB/cohere/db"
+	"github.com/arbha1erao/cohereDB/cohere/utils"
 )
 
 type Server struct {

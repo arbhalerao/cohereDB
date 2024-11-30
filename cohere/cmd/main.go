@@ -8,9 +8,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/Aditya-Bhalerao/cohereDB/db"
-	"github.com/Aditya-Bhalerao/cohereDB/utils"
-	"github.com/Aditya-Bhalerao/cohereDB/web"
+	"github.com/arbha1erao/cohereDB/cohere/db"
+	"github.com/arbha1erao/cohereDB/cohere/utils"
+	"github.com/arbha1erao/cohereDB/cohere/web"
 )
 
 func main() {

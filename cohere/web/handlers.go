@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/Aditya-Bhalerao/cohereDB/utils"
+	"github.com/arbha1erao/cohereDB/cohere/utils"
 	"github.com/dgraph-io/badger/v4"
 )
 
