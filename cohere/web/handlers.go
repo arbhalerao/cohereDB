@@ -65,6 +65,7 @@ func (s *Server) GetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// SetHandler handles write requests
 func (s *Server) SetHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -117,6 +118,7 @@ func (s *Server) SetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// DeleteHandler handles delete requests
 func (s *Server) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
