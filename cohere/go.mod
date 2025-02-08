@@ -1,6 +1,6 @@
 module github.com/arbha1erao/cohereDB/cohere
 
-go 1.23.3
+go 1.22
 
 require (
 	github.com/BurntSushi/toml v1.4.0
