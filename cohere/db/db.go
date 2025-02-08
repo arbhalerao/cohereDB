@@ -109,3 +109,26 @@ func (d *Database) DeleteKey(key string) error {
 
 	return nil
 }
+
+func (d *Database) GetKeys() ([][]byte, error) {
+	var keys [][]byte
+
+	err := d.db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchValues = false
+		iter := txn.NewIterator(opts)
+		defer iter.Close()
+
+		for iter.Rewind(); iter.Valid(); iter.Next() {
+			key := iter.Item().Key()
+			keys = append(keys, key)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("transaction failed while getting keys: %v", err)
+	}
+
+	return keys, nil
+}
