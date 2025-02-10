@@ -1,10 +1,11 @@
-package web
+package db_server
 
 import (
 	"crypto/sha256"
 	"fmt"
 	"net/http"
 
+	"github.com/arbha1erao/cohereDB/cohere/config"
 	"github.com/arbha1erao/cohereDB/cohere/db"
 	"github.com/arbha1erao/cohereDB/cohere/utils"
 )
@@ -17,7 +18,7 @@ type Server struct {
 	serverAddrs *map[int]string
 }
 
-func NewServer(db *db.Database, addr string, config Config) *Server {
+func NewServer(db *db.Database, addr string, config config.Config) *Server {
 	peerServers := make(map[int]string)
 	for _, srv := range config.PeerServers {
 		peerServers[srv.Shard] = srv.Addr
@@ -37,7 +38,6 @@ func (s *Server) RegisterHandlers() {
 	http.HandleFunc("/get", s.GetHandler)
 	http.HandleFunc("/set", s.SetHandler)
 	http.HandleFunc("/delete", s.DeleteHandler)
-	http.HandleFunc("/keys", s.GetKeysHandler)
 
 	// Register more handlers here as needed
 
