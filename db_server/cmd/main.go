@@ -9,7 +9,7 @@ import (
 	"syscall"
 
 	"github.com/arbha1erao/cohereDB/db"
-	"github.com/arbha1erao/cohereDB/db_server"
+	"github.com/arbha1erao/cohereDB/db_server/db_manager_client"
 	grpc_server "github.com/arbha1erao/cohereDB/db_server/grpc"
 	http_server "github.com/arbha1erao/cohereDB/db_server/http"
 	"github.com/arbha1erao/cohereDB/utils"
@@ -62,7 +62,7 @@ func main() {
 
 	// Use DBManagerClient for registration
 	ready := make(chan bool)
-	managerClient := db_server.NewDBManagerClient(managerAddr, region)
+	managerClient := db_manager_client.NewDBManagerClient(managerAddr, region)
 	go managerClient.RegisterWithManager(region, httpAddr, grpcAddr, ready)
 
 	// Wait for registration to complete before proceeding
