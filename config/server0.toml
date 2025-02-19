@@ -1,15 +1,5 @@
-[database]
-shard_count = 3
-
 [server]
-shard = 0
-addr = "127.0.0.1:52000"
-container_addr = "127.0.0.1:8080"
-
-[[peer_servers]]
-shard = 1
-addr = "127.0.0.1:52001"
-
-[[peer_servers]]
-shard = 2
-addr = "127.0.0.1:52002"
+region = "pune"
+http_addr = "127.0.0.1:8080"
+grpc_addr = "127.0.0.1:52000"
+manager_addr = "127.0.0.1:9090"
