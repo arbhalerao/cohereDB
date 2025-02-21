@@ -4,7 +4,7 @@
 // - protoc             v3.21.12
 // source: db_manager.proto
 
-package pb
+package db_manager
 
 import (
 	context "context"
