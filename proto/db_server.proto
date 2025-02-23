@@ -8,6 +8,7 @@ service DBServer {
   rpc Set(SetRequest) returns (SetResponse);
   rpc Get(GetRequest) returns (GetResponse);
   rpc Delete(DeleteRequest) returns (DeleteResponse);
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
 }
 
 message SetRequest {
@@ -33,4 +34,10 @@ message DeleteRequest {
 
 message DeleteResponse {
   bool success = 1;
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  bool healthy = 1;
 }
