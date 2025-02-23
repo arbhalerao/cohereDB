@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"github.com/arbha1erao/cohereDB/pb/db_server"
@@ -20,15 +21,17 @@ type dbServer struct {
 type DBManager struct {
 	mu      sync.Mutex
 	servers map[string]dbServer
+	hasher  *ConsistentHasher
 }
 
 func NewDBManager() *DBManager {
 	return &DBManager{
 		servers: make(map[string]dbServer),
+		hasher:  NewConsistentHasher(),
 	}
 }
 
-// AddServer registers a new DB server and creates a gRPC connection
+// AddServer registers a new DB server, creates a gRPC connection, and updates the consistent hash ring
 func (m *DBManager) AddServer(uuid, region, addr string) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -52,10 +55,12 @@ func (m *DBManager) AddServer(uuid, region, addr string) bool {
 		client: client,
 	}
 
+	m.hasher.AddNode(uuid)
+
 	return true
 }
 
-// RemoveServer unregisters a DB server and closes its connection
+// RemoveServer unregisters a DB server, closes its connection, and updates the consistent hash ring.
 func (m *DBManager) RemoveServer(uuid string) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -71,10 +76,12 @@ func (m *DBManager) RemoveServer(uuid string) bool {
 
 	delete(m.servers, uuid)
 
+	m.hasher.RemoveNode(uuid)
+
 	return true
 }
 
-// HealthCheckServers verifies if registered DB servers are alive.
+// HealthCheckServers verifies if registered DB servers are alive and removes unresponsive ones
 func (m *DBManager) HealthCheckServers() {
 	m.mu.Lock()
 	servers := make(map[string]dbServer, len(m.servers))
@@ -103,17 +110,26 @@ func (m *DBManager) HealthCheckServers() {
 		}
 	}
 	m.mu.Unlock()
+
+	m.ReconcileServers()
 }
 
 // GetKey retrieves a value from the appropriate DB server
 func (m *DBManager) GetKey(key string) (string, error) {
-	uuid := ""
 	m.mu.Lock()
-	server, exists := m.servers[uuid]
+	uuid, exists := m.hasher.GetNode(key)
 	m.mu.Unlock()
 
 	if !exists {
-		return "", nil
+		return "", fmt.Errorf("no available database servers")
+	}
+
+	m.mu.Lock()
+	server, serverExists := m.servers[uuid]
+	m.mu.Unlock()
+
+	if !serverExists {
+		return "", fmt.Errorf("server not found: %s", uuid)
 	}
 
 	resp, err := server.client.Get(context.Background(), &db_server.GetRequest{Key: key})
@@ -126,13 +142,20 @@ func (m *DBManager) GetKey(key string) (string, error) {
 
 // SetKey stores a key-value pair on a specific DB server
 func (m *DBManager) SetKey(key, value string) (bool, error) {
-	uuid := ""
 	m.mu.Lock()
-	server, exists := m.servers[uuid]
+	uuid, exists := m.hasher.GetNode(key)
 	m.mu.Unlock()
 
 	if !exists {
-		return false, nil
+		return false, fmt.Errorf("no available database servers")
+	}
+
+	m.mu.Lock()
+	server, serverExists := m.servers[uuid]
+	m.mu.Unlock()
+
+	if !serverExists {
+		return false, fmt.Errorf("server not found: %s", uuid)
 	}
 
 	_, err := server.client.Set(context.Background(), &db_server.SetRequest{Key: key, Value: value})
@@ -145,13 +168,20 @@ func (m *DBManager) SetKey(key, value string) (bool, error) {
 
 // DeleteKey removes a key-value pair from a specific DB server
 func (m *DBManager) DeleteKey(key string) (bool, error) {
-	uuid := ""
 	m.mu.Lock()
-	server, exists := m.servers[uuid]
+	uuid, exists := m.hasher.GetNode(key)
 	m.mu.Unlock()
 
 	if !exists {
-		return false, nil
+		return false, fmt.Errorf("no available database servers")
+	}
+
+	m.mu.Lock()
+	server, serverExists := m.servers[uuid]
+	m.mu.Unlock()
+
+	if !serverExists {
+		return false, fmt.Errorf("server not found: %s", uuid)
 	}
 
 	_, err := server.client.Delete(context.Background(), &db_server.DeleteRequest{Key: key})
@@ -160,4 +190,16 @@ func (m *DBManager) DeleteKey(key string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+// ReconcileServers ensures the hash ring is updated with active servers
+func (m *DBManager) ReconcileServers() {
+	m.mu.Lock()
+	activeNodes := make([]string, 0, len(m.servers))
+	for uuid := range m.servers {
+		activeNodes = append(activeNodes, uuid)
+	}
+	m.mu.Unlock()
+
+	m.hasher.Reconcile(activeNodes)
 }
