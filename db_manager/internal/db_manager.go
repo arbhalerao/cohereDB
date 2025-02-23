@@ -37,7 +37,7 @@ func (m *DBManager) AddServer(uuid, region, addr string) bool {
 		return false
 	}
 
-	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return false
 	}
@@ -89,7 +89,6 @@ func (m *DBManager) HealthCheckServers() {
 		_, err := server.client.HealthCheck(context.Background(), &db_server.HealthCheckRequest{})
 		if err != nil {
 			toRemove = append(toRemove, uuid)
-		} else {
 		}
 	}
 
