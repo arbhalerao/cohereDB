@@ -10,7 +10,7 @@ import (
 
 	"github.com/arbha1erao/cohereDB/db"
 	"github.com/arbha1erao/cohereDB/db_server/db_manager_client"
-	grpc_server "github.com/arbha1erao/cohereDB/db_server/grpc"
+	grpc_server "github.com/arbha1erao/cohereDB/db_server/server/grpc"
 	"github.com/arbha1erao/cohereDB/utils"
 )
 
