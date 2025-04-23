@@ -11,6 +11,7 @@ type DatabaseConfig struct {
 }
 
 type ServerConfig struct {
-	Shard int    `toml:"shard"`
-	Addr  string `toml:"addr"`
+	Shard         int    `toml:"shard"`
+	Addr          string `toml:"addr"`
+	ContainerAddr string `toml:"container_addr"`
 }

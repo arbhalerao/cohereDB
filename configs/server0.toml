@@ -4,6 +4,7 @@ shard_count = 3
 [server]
 shard = 0
 addr = "127.0.0.1:52000"
+container_addr = "127.0.0.1:8080"
 
 [[peer_servers]]
 shard = 1

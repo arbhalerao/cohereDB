@@ -16,6 +16,7 @@ import (
 func main() {
 	configPath := flag.String("config", "", "Path to server config file (e.g., server0.toml)")
 	cleanup := flag.Bool("cleanup", false, "Clean up the database when server shuts down")
+	container := flag.Bool("container", false, "CohereDB running inside a container")
 	flag.Parse()
 
 	if *configPath == "" {
@@ -45,8 +46,17 @@ func main() {
 		return
 	}
 
+	var serverAddr string
+	if *container {
+		utils.Logger.Info().Msgf("Running in container mode. Using container address: %s", config.Server.ContainerAddr)
+		serverAddr = config.Server.ContainerAddr
+	} else {
+		utils.Logger.Info().Msgf("Running in host mode. Using address: %s", config.Server.Addr)
+		serverAddr = config.Server.Addr
+	}
+
 	// Create and start the server instance
-	server := web.NewServer(dbInstance, config.Server.Addr, config.Server.Shard, config.Database.ShardCount, &peerServers)
+	server := web.NewServer(dbInstance, serverAddr, config.Server.Shard, config.Database.ShardCount, &peerServers)
 	server.RegisterHandlers()
 
 	// Setup graceful shutdown
@@ -55,7 +65,7 @@ func main() {
 
 	serverErrors := make(chan error, 1)
 	go func() {
-		utils.Logger.Info().Msgf("Starting server at %s...", config.Server.Addr)
+		utils.Logger.Info().Msgf("Starting server at %s...", serverAddr)
 		if err := server.Start(); err != nil {
 			serverErrors <- err
 		}
