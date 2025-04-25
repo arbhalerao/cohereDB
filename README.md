@@ -26,9 +26,9 @@
 │   │   ├── logger.go             # Logging utilities
 │   │   └── toml_loader.go        # TOML configuration loader
 │   └── web
-│       ├── config.go             # Web server configuration
-│       ├── handlers.go           # HTTP request handlers
-│       └── server.go             # Web server logic to expose the database as a service
+│   |   ├── config.go             # Web server configuration
+│   |   ├── handlers.go           # HTTP request handlers
+│   |   └── server.go             # Web server logic to expose the database as a service
 │   ├── docker-compose.yaml       # Docker Compose setup for running multiple server instances
 │   ├── Dockerfile                # Dockerfile for building the server container
 │   ├── go.mod
