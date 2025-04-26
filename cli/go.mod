@@ -1,6 +1,6 @@
 module github.com/arbha1erao/cohereDB/cli
 
-go 1.23.3
+go 1.22
 
 require github.com/spf13/cobra v1.8.1
 
