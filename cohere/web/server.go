@@ -17,13 +17,18 @@ type Server struct {
 	serverAddrs *map[int]string
 }
 
-func NewServer(db *db.Database, addr string, shardIdx int, shardCount int, serverAddrs *map[int]string) *Server {
+func NewServer(db *db.Database, addr string, config Config) *Server {
+	peerServers := make(map[int]string)
+	for _, srv := range config.PeerServers {
+		peerServers[srv.Shard] = srv.Addr
+	}
+
 	return &Server{
 		db:          db,
 		addr:        addr,
-		shardIdx:    shardIdx,
-		shardCount:  shardCount,
-		serverAddrs: serverAddrs,
+		shardIdx:    config.Server.Shard,
+		shardCount:  config.Database.ShardCount,
+		serverAddrs: &peerServers,
 	}
 }
 

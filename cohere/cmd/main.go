@@ -56,7 +56,7 @@ func main() {
 	}
 
 	// Create and start the server instance
-	server := web.NewServer(dbInstance, serverAddr, config.Server.Shard, config.Database.ShardCount, &peerServers)
+	server := web.NewServer(dbInstance, serverAddr, config)
 	server.RegisterHandlers()
 
 	// Setup graceful shutdown
