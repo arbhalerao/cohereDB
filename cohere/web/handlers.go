@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/arbha1erao/cohereDB/cohere/utils"
 	"github.com/dgraph-io/badger/v4"
@@ -173,4 +174,38 @@ func (s *Server) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 		utils.Logger.Error().Msgf("Error writing response for key '%s': %v", key, err)
 		return
 	}
+}
+
+// GetKeysHandler handles requests to retrieve all keys from the current shard.
+// Note(aditya): WIP
+func (s *Server) GetKeysHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	keys, err := s.db.GetKeys()
+	if err != nil {
+		utils.Logger.Error().Msgf("[KEYS] Error retrieving keys from shard %d: %v", s.shardIdx, err)
+		http.Error(w, fmt.Sprintf("Error: Failed to retrieve keys from shard %d", s.shardIdx), http.StatusInternalServerError)
+		return
+	}
+
+	if len(keys) == 0 {
+		utils.Logger.Info().Msgf("[KEYS] No keys found in shard %d", s.shardIdx)
+		w.Write([]byte(`{"message": "No keys found"}`))
+		return
+	}
+
+	keyStrings := make([]string, len(keys))
+	for i, key := range keys {
+		keyStrings[i] = string(key)
+	}
+
+	responseKeys := strings.Join(keyStrings, ", ")
+	response := fmt.Sprintf(`{"message": "Keys ['%s']"}`, responseKeys)
+	_, err = w.Write([]byte(response))
+	if err != nil {
+		utils.Logger.Error().Msgf("[KEYS] Error writing response: %v", err)
+		return
+	}
+
+	utils.Logger.Info().Msgf("[KEYS] Successfully sent %d keys from shard %d", len(keys), s.shardIdx)
 }

@@ -37,6 +37,7 @@ func (s *Server) RegisterHandlers() {
 	http.HandleFunc("/get", s.GetHandler)
 	http.HandleFunc("/set", s.SetHandler)
 	http.HandleFunc("/delete", s.DeleteHandler)
+	http.HandleFunc("/keys", s.GetKeysHandler)
 
 	// Register more handlers here as needed
 
