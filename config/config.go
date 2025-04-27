@@ -1,4 +1,4 @@
-package web
+package config
 
 type Config struct {
 	Database    DatabaseConfig `toml:"database"`
