@@ -24,9 +24,9 @@ message KeyResponse {
 }
 
 message SetResponse {
-  string message = 1;
+  bool success = 1;
 }
 
 message DeleteResponse {
-  string message = 1;
+  bool success = 1;
 }
