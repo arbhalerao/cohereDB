@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package db_server;
+package pb;
 
-option go_package = "github.com/arbha1erao/cohereDB/db_server";
+option go_package = "github.com/arbha1erao/cohereDB/db_server/pb";
 
 service DBService {
   rpc Get (KeyRequest) returns (KeyResponse);

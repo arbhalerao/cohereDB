@@ -4,9 +4,9 @@ SERVER_DIR=./db_server
 
 generate:
 	protoc --proto_path=./proto \
-		--go_out=$(SERVER_DIR)/grpc \
+		--go_out=$(SERVER_DIR)/grpc/pb \
 		--go_opt=paths=source_relative \
-		--go-grpc_out=$(SERVER_DIR)/grpc \
+		--go-grpc_out=$(SERVER_DIR)/grpc/pb \
 		--go-grpc_opt=paths=source_relative \
 		$(PROTO_FILE)
 

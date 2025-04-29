@@ -4,7 +4,7 @@
 // - protoc             v3.21.12
 // source: db_server.proto
 
-package db_server
+package pb
 
 import (
 	context "context"
@@ -19,9 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DBService_Get_FullMethodName    = "/db_server.DBService/Get"
-	DBService_Set_FullMethodName    = "/db_server.DBService/Set"
-	DBService_Delete_FullMethodName = "/db_server.DBService/Delete"
+	DBService_Get_FullMethodName    = "/pb.DBService/Get"
+	DBService_Set_FullMethodName    = "/pb.DBService/Set"
+	DBService_Delete_FullMethodName = "/pb.DBService/Delete"
 )
 
 // DBServiceClient is the client API for DBService service.
@@ -176,7 +176,7 @@ func _DBService_Delete_Handler(srv interface{}, ctx context.Context, dec func(in
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var DBService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "db_server.DBService",
+	ServiceName: "pb.DBService",
 	HandlerType: (*DBServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
