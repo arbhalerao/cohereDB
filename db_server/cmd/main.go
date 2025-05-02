@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/arbha1erao/cohereDB/db"
+	"github.com/arbha1erao/cohereDB/db_server"
 	grpc_server "github.com/arbha1erao/cohereDB/db_server/grpc"
 	http_server "github.com/arbha1erao/cohereDB/db_server/http"
 	"github.com/arbha1erao/cohereDB/utils"
@@ -41,6 +42,7 @@ func main() {
 	region := config.Server.Region
 	httpAddr := config.Server.HTTP_Addr
 	grpcAddr := config.Server.GRPC_Addr
+	managerAddr := config.Server.MANAGER_Addr
 
 	// Initialize database
 	dbPath := fmt.Sprintf("../../data/db_%s", region)
@@ -57,6 +59,17 @@ func main() {
 
 	// Initialize gRPC Server
 	grpcService := grpc_server.NewServer(database, grpcAddr)
+
+	// Use DBManagerClient for registration
+	ready := make(chan bool)
+	managerClient := db_server.NewDBManagerClient(managerAddr, region)
+	go managerClient.RegisterWithManager(region, httpAddr, grpcAddr, ready)
+
+	// Wait for registration to complete before proceeding
+	utils.Logger.Info().Msg("Waiting for registration with db_manager...")
+	<-ready
+	close(ready)
+	utils.Logger.Info().Msg("Registration successful. Starting servers...")
 
 	// Handle shutdown signals
 	stop := make(chan os.Signal, 1)
