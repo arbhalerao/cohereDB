@@ -18,4 +18,20 @@ install:
 	go get google.golang.org/protobuf/cmd/protoc-gen-go
 	go get google.golang.org/grpc/cmd/protoc-gen-go-grpc
 
+lint:
+	@echo "Running lint on db..."
+	@(cd db && golangci-lint run)
+
+	@echo "Running lint on db_manager..."
+	@(cd db_manager && golangci-lint run)
+
+	@echo "Running lint on db_server..."
+	@(cd db_server && golangci-lint run)
+
+	@echo "Running lint on utils..."
+	@(cd utils && golangci-lint run)
+
+	@echo "Linting completed!"
+
+
 all: generate
