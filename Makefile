@@ -1,18 +1,28 @@
-PROTO_FILE=./proto/db_server.proto
+DB_SERVER_PROTO=./proto/db_server.proto
+DB_MANAGER_PROTO=./proto/db_manager.proto
 
-SERVER_DIR=./db_server
+DB_SERVER_DIR=./db_server
+DB_MANAGER_DIR=./db_manager
 
-generate:
+generate-db-server:
 	protoc --proto_path=./proto \
-		--go_out=$(SERVER_DIR)/grpc/pb \
+		--go_out=$(DB_SERVER_DIR)/grpc/pb \
 		--go_opt=paths=source_relative \
-		--go-grpc_out=$(SERVER_DIR)/grpc/pb \
+		--go-grpc_out=$(DB_SERVER_DIR)/grpc/pb \
 		--go-grpc_opt=paths=source_relative \
-		$(PROTO_FILE)
+		$(DB_SERVER_PROTO)
+
+generate-db-manager:
+	protoc --proto_path=./proto \
+		--go_out=$(DB_MANAGER_DIR)/grpc/pb \
+		--go_opt=paths=source_relative \
+		--go-grpc_out=$(DB_MANAGER_DIR)/grpc/pb \
+		--go-grpc_opt=paths=source_relative \
+		$(DB_MANAGER_PROTO)
 
 clean:
-	rm -f $(SERVER_DIR)/grpc/db_server.pb.go
-	rm -f $(SERVER_DIR)/grpc/db_server_grpc.pb.go
+	rm -f $(DB_SERVER_DIR)/grpc/pb/*.pb.go
+	rm -f $(DB_MANAGER_DIR)/grpc/pb/*.pb.go
 
 install:
 	go get google.golang.org/protobuf/cmd/protoc-gen-go
@@ -33,5 +43,7 @@ lint:
 
 	@echo "Linting completed!"
 
+# Run all proto generations
+generate: generate-db-server generate-db-manager
 
 all: generate
