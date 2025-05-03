@@ -19,19 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DBManager_RegisterDBServer_FullMethodName = "/pb.DBManager/RegisterDBServer"
-	DBManager_Heartbeat_FullMethodName        = "/pb.DBManager/Heartbeat"
-	DBManager_Set_FullMethodName              = "/pb.DBManager/Set"
-	DBManager_Get_FullMethodName              = "/pb.DBManager/Get"
-	DBManager_Delete_FullMethodName           = "/pb.DBManager/Delete"
+	DBManager_Set_FullMethodName    = "/pb.DBManager/Set"
+	DBManager_Get_FullMethodName    = "/pb.DBManager/Get"
+	DBManager_Delete_FullMethodName = "/pb.DBManager/Delete"
 )
 
 // DBManagerClient is the client API for DBManager service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DBManagerClient interface {
-	RegisterDBServer(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
-	Heartbeat(ctx context.Context, in *HeartbeatRequest, opts ...grpc.CallOption) (*HeartbeatResponse, error)
 	Set(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*SetResponse, error)
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
@@ -43,26 +39,6 @@ type dBManagerClient struct {
 
 func NewDBManagerClient(cc grpc.ClientConnInterface) DBManagerClient {
 	return &dBManagerClient{cc}
-}
-
-func (c *dBManagerClient) RegisterDBServer(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RegisterResponse)
-	err := c.cc.Invoke(ctx, DBManager_RegisterDBServer_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dBManagerClient) Heartbeat(ctx context.Context, in *HeartbeatRequest, opts ...grpc.CallOption) (*HeartbeatResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(HeartbeatResponse)
-	err := c.cc.Invoke(ctx, DBManager_Heartbeat_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *dBManagerClient) Set(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*SetResponse, error) {
@@ -99,8 +75,6 @@ func (c *dBManagerClient) Delete(ctx context.Context, in *DeleteRequest, opts ..
 // All implementations must embed UnimplementedDBManagerServer
 // for forward compatibility.
 type DBManagerServer interface {
-	RegisterDBServer(context.Context, *RegisterRequest) (*RegisterResponse, error)
-	Heartbeat(context.Context, *HeartbeatRequest) (*HeartbeatResponse, error)
 	Set(context.Context, *SetRequest) (*SetResponse, error)
 	Get(context.Context, *GetRequest) (*GetResponse, error)
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
@@ -114,12 +88,6 @@ type DBManagerServer interface {
 // pointer dereference when methods are called.
 type UnimplementedDBManagerServer struct{}
 
-func (UnimplementedDBManagerServer) RegisterDBServer(context.Context, *RegisterRequest) (*RegisterResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RegisterDBServer not implemented")
-}
-func (UnimplementedDBManagerServer) Heartbeat(context.Context, *HeartbeatRequest) (*HeartbeatResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Heartbeat not implemented")
-}
 func (UnimplementedDBManagerServer) Set(context.Context, *SetRequest) (*SetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Set not implemented")
 }
@@ -148,42 +116,6 @@ func RegisterDBManagerServer(s grpc.ServiceRegistrar, srv DBManagerServer) {
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&DBManager_ServiceDesc, srv)
-}
-
-func _DBManager_RegisterDBServer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RegisterRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DBManagerServer).RegisterDBServer(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: DBManager_RegisterDBServer_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBManagerServer).RegisterDBServer(ctx, req.(*RegisterRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _DBManager_Heartbeat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(HeartbeatRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DBManagerServer).Heartbeat(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: DBManager_Heartbeat_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBManagerServer).Heartbeat(ctx, req.(*HeartbeatRequest))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _DBManager_Set_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -247,14 +179,6 @@ var DBManager_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "pb.DBManager",
 	HandlerType: (*DBManagerServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "RegisterDBServer",
-			Handler:    _DBManager_RegisterDBServer_Handler,
-		},
-		{
-			MethodName: "Heartbeat",
-			Handler:    _DBManager_Heartbeat_Handler,
-		},
 		{
 			MethodName: "Set",
 			Handler:    _DBManager_Set_Handler,

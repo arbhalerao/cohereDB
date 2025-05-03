@@ -5,31 +5,12 @@ package pb;
 option go_package = "github.com/arbha1erao/cohereDB/db_manager/grpc/pb";
 
 service DBManager {
-    rpc RegisterDBServer(RegisterRequest) returns (RegisterResponse);
-
-    rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
-
     rpc Set(SetRequest) returns (SetResponse);
     rpc Get(GetRequest) returns (GetResponse);
     rpc Delete(DeleteRequest) returns (DeleteResponse);
-}
 
-message RegisterRequest {
-    string region = 1;
-    string http_addr = 2;
-    string grpc_addr = 3;
-}
-
-message RegisterResponse {
-    bool success = 1;
-}
-
-message HeartbeatRequest {
-    string grpc_addr = 1;
-}
-
-message HeartbeatResponse {
-    bool alive = 1;
+    // rpc RegisterDBServer(RegisterRequest) returns (RegisterResponse);
+    // rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
 }
 
 message SetRequest {
@@ -47,7 +28,6 @@ message GetRequest {
 
 message GetResponse {
     string value = 1;
-    bool found = 2;
 }
 
 message DeleteRequest {
@@ -57,3 +37,21 @@ message DeleteRequest {
 message DeleteResponse {
     bool success = 1;
 }
+
+// message RegisterRequest {
+//     string region = 1;
+//     string http_addr = 2;
+//     string grpc_addr = 3;
+// }
+
+// message RegisterResponse {
+//     bool success = 1;
+// }
+
+// message HeartbeatRequest {
+//     string grpc_addr = 1;
+// }
+
+// message HeartbeatResponse {
+//     bool alive = 1;
+// }

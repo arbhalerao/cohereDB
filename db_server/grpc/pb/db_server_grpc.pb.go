@@ -19,177 +19,177 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DBService_Get_FullMethodName    = "/pb.DBService/Get"
-	DBService_Set_FullMethodName    = "/pb.DBService/Set"
-	DBService_Delete_FullMethodName = "/pb.DBService/Delete"
+	DBServer_Set_FullMethodName    = "/pb.DBServer/Set"
+	DBServer_Get_FullMethodName    = "/pb.DBServer/Get"
+	DBServer_Delete_FullMethodName = "/pb.DBServer/Delete"
 )
 
-// DBServiceClient is the client API for DBService service.
+// DBServerClient is the client API for DBServer service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type DBServiceClient interface {
-	Get(ctx context.Context, in *KeyRequest, opts ...grpc.CallOption) (*KeyResponse, error)
-	Set(ctx context.Context, in *KeyValueRequest, opts ...grpc.CallOption) (*SetResponse, error)
-	Delete(ctx context.Context, in *KeyRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
+type DBServerClient interface {
+	Set(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*SetResponse, error)
+	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
+	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
 }
 
-type dBServiceClient struct {
+type dBServerClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewDBServiceClient(cc grpc.ClientConnInterface) DBServiceClient {
-	return &dBServiceClient{cc}
+func NewDBServerClient(cc grpc.ClientConnInterface) DBServerClient {
+	return &dBServerClient{cc}
 }
 
-func (c *dBServiceClient) Get(ctx context.Context, in *KeyRequest, opts ...grpc.CallOption) (*KeyResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(KeyResponse)
-	err := c.cc.Invoke(ctx, DBService_Get_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dBServiceClient) Set(ctx context.Context, in *KeyValueRequest, opts ...grpc.CallOption) (*SetResponse, error) {
+func (c *dBServerClient) Set(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*SetResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(SetResponse)
-	err := c.cc.Invoke(ctx, DBService_Set_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, DBServer_Set_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dBServiceClient) Delete(ctx context.Context, in *KeyRequest, opts ...grpc.CallOption) (*DeleteResponse, error) {
+func (c *dBServerClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetResponse)
+	err := c.cc.Invoke(ctx, DBServer_Get_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dBServerClient) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DeleteResponse)
-	err := c.cc.Invoke(ctx, DBService_Delete_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, DBServer_Delete_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// DBServiceServer is the server API for DBService service.
-// All implementations must embed UnimplementedDBServiceServer
+// DBServerServer is the server API for DBServer service.
+// All implementations must embed UnimplementedDBServerServer
 // for forward compatibility.
-type DBServiceServer interface {
-	Get(context.Context, *KeyRequest) (*KeyResponse, error)
-	Set(context.Context, *KeyValueRequest) (*SetResponse, error)
-	Delete(context.Context, *KeyRequest) (*DeleteResponse, error)
-	mustEmbedUnimplementedDBServiceServer()
+type DBServerServer interface {
+	Set(context.Context, *SetRequest) (*SetResponse, error)
+	Get(context.Context, *GetRequest) (*GetResponse, error)
+	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
+	mustEmbedUnimplementedDBServerServer()
 }
 
-// UnimplementedDBServiceServer must be embedded to have
+// UnimplementedDBServerServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedDBServiceServer struct{}
+type UnimplementedDBServerServer struct{}
 
-func (UnimplementedDBServiceServer) Get(context.Context, *KeyRequest) (*KeyResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
-}
-func (UnimplementedDBServiceServer) Set(context.Context, *KeyValueRequest) (*SetResponse, error) {
+func (UnimplementedDBServerServer) Set(context.Context, *SetRequest) (*SetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Set not implemented")
 }
-func (UnimplementedDBServiceServer) Delete(context.Context, *KeyRequest) (*DeleteResponse, error) {
+func (UnimplementedDBServerServer) Get(context.Context, *GetRequest) (*GetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+}
+func (UnimplementedDBServerServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
-func (UnimplementedDBServiceServer) mustEmbedUnimplementedDBServiceServer() {}
-func (UnimplementedDBServiceServer) testEmbeddedByValue()                   {}
+func (UnimplementedDBServerServer) mustEmbedUnimplementedDBServerServer() {}
+func (UnimplementedDBServerServer) testEmbeddedByValue()                  {}
 
-// UnsafeDBServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to DBServiceServer will
+// UnsafeDBServerServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to DBServerServer will
 // result in compilation errors.
-type UnsafeDBServiceServer interface {
-	mustEmbedUnimplementedDBServiceServer()
+type UnsafeDBServerServer interface {
+	mustEmbedUnimplementedDBServerServer()
 }
 
-func RegisterDBServiceServer(s grpc.ServiceRegistrar, srv DBServiceServer) {
-	// If the following call pancis, it indicates UnimplementedDBServiceServer was
+func RegisterDBServerServer(s grpc.ServiceRegistrar, srv DBServerServer) {
+	// If the following call pancis, it indicates UnimplementedDBServerServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&DBService_ServiceDesc, srv)
+	s.RegisterService(&DBServer_ServiceDesc, srv)
 }
 
-func _DBService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(KeyRequest)
+func _DBServer_Set_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBServiceServer).Get(ctx, in)
+		return srv.(DBServerServer).Set(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBService_Get_FullMethodName,
+		FullMethod: DBServer_Set_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBServiceServer).Get(ctx, req.(*KeyRequest))
+		return srv.(DBServerServer).Set(ctx, req.(*SetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DBService_Set_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(KeyValueRequest)
+func _DBServer_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBServiceServer).Set(ctx, in)
+		return srv.(DBServerServer).Get(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBService_Set_FullMethodName,
+		FullMethod: DBServer_Get_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBServiceServer).Set(ctx, req.(*KeyValueRequest))
+		return srv.(DBServerServer).Get(ctx, req.(*GetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DBService_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(KeyRequest)
+func _DBServer_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBServiceServer).Delete(ctx, in)
+		return srv.(DBServerServer).Delete(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBService_Delete_FullMethodName,
+		FullMethod: DBServer_Delete_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBServiceServer).Delete(ctx, req.(*KeyRequest))
+		return srv.(DBServerServer).Delete(ctx, req.(*DeleteRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// DBService_ServiceDesc is the grpc.ServiceDesc for DBService service.
+// DBServer_ServiceDesc is the grpc.ServiceDesc for DBServer service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var DBService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "pb.DBService",
-	HandlerType: (*DBServiceServer)(nil),
+var DBServer_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "pb.DBServer",
+	HandlerType: (*DBServerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Get",
-			Handler:    _DBService_Get_Handler,
+			MethodName: "Set",
+			Handler:    _DBServer_Set_Handler,
 		},
 		{
-			MethodName: "Set",
-			Handler:    _DBService_Set_Handler,
+			MethodName: "Get",
+			Handler:    _DBServer_Get_Handler,
 		},
 		{
 			MethodName: "Delete",
-			Handler:    _DBService_Delete_Handler,
+			Handler:    _DBServer_Delete_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
