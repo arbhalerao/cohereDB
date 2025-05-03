@@ -26,13 +26,15 @@ jobs:
 
       - name: Install golangci-lint
         run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.60.1
+          GOLANGCI_LINT_VERSION=v1.60.1
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin $GOLANGCI_LINT_VERSION
 
       - name: Run golangci-lint in submodules
         run: |
-          for dir in db db_manager db_server utils; do
+          MODULES=("db" "db_manager" "db_server" "utils")
+          for dir in "${MODULES[@]}"; do
             if [ -f "$dir/go.mod" ]; then
               echo "Running lint in $dir..."
-              (cd "$dir" && golangci-lint run --timeout=5m --issues-exit-code=1 ./...)
+              (cd "$dir" && golangci-lint run --timeout=5m --issues-exit-code=1)
             fi
           done
