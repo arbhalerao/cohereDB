@@ -4,7 +4,7 @@
 // - protoc             v3.21.12
 // source: db_server.proto
 
-package pb
+package db_server
 
 import (
 	context "context"

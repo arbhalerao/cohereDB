@@ -1,28 +1,30 @@
 DB_SERVER_PROTO=./proto/db_server.proto
 DB_MANAGER_PROTO=./proto/db_manager.proto
 
-DB_SERVER_DIR=./db_server
-DB_MANAGER_DIR=./db_manager
+COHERE_DB_DIR=.
+DB_SERVER_DIR=$(COHERE_DB_DIR)/pb/db_server
+DB_MANAGER_DIR=$(COHERE_DB_DIR)/pb/db_manager
 
+# Generate the db_server code
 generate-db-server:
 	protoc --proto_path=./proto \
-		--go_out=$(DB_SERVER_DIR)/grpc/pb \
+		--go_out=$(DB_SERVER_DIR) \
 		--go_opt=paths=source_relative \
-		--go-grpc_out=$(DB_SERVER_DIR)/grpc/pb \
+		--go-grpc_out=$(DB_SERVER_DIR) \
 		--go-grpc_opt=paths=source_relative \
 		$(DB_SERVER_PROTO)
 
 generate-db-manager:
 	protoc --proto_path=./proto \
-		--go_out=$(DB_MANAGER_DIR)/grpc/pb \
+		--go_out=$(DB_MANAGER_DIR) \
 		--go_opt=paths=source_relative \
-		--go-grpc_out=$(DB_MANAGER_DIR)/grpc/pb \
+		--go-grpc_out=$(DB_MANAGER_DIR) \
 		--go-grpc_opt=paths=source_relative \
 		$(DB_MANAGER_PROTO)
 
 clean:
-	rm -f $(DB_SERVER_DIR)/grpc/pb/*.pb.go
-	rm -f $(DB_MANAGER_DIR)/grpc/pb/*.pb.go
+	rm -f $(DB_SERVER_DIR)/*.pb.go
+	rm -f $(DB_MANAGER_DIR)/*.pb.go
 
 install:
 	go get google.golang.org/protobuf/cmd/protoc-gen-go
