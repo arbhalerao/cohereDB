@@ -31,7 +31,7 @@ jobs:
 
       - name: Run golangci-lint in submodules
         run: |
-          MODULES=("db" "db_manager" "db_server" "utils")
+          MODULES=("db" "db_manager" "db_server" "utils" "pb")
           for dir in "${MODULES[@]}"; do
             if [ -f "$dir/go.mod" ]; then
               echo "Running lint in $dir..."
