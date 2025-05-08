@@ -19,9 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DBServer_Set_FullMethodName    = "/pb.DBServer/Set"
-	DBServer_Get_FullMethodName    = "/pb.DBServer/Get"
-	DBServer_Delete_FullMethodName = "/pb.DBServer/Delete"
+	DBServer_Set_FullMethodName         = "/pb.DBServer/Set"
+	DBServer_Get_FullMethodName         = "/pb.DBServer/Get"
+	DBServer_Delete_FullMethodName      = "/pb.DBServer/Delete"
+	DBServer_HealthCheck_FullMethodName = "/pb.DBServer/HealthCheck"
 )
 
 // DBServerClient is the client API for DBServer service.
@@ -31,6 +32,7 @@ type DBServerClient interface {
 	Set(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*SetResponse, error)
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*DeleteResponse, error)
+	HealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
 }
 
 type dBServerClient struct {
@@ -71,6 +73,16 @@ func (c *dBServerClient) Delete(ctx context.Context, in *DeleteRequest, opts ...
 	return out, nil
 }
 
+func (c *dBServerClient) HealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(HealthCheckResponse)
+	err := c.cc.Invoke(ctx, DBServer_HealthCheck_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // DBServerServer is the server API for DBServer service.
 // All implementations must embed UnimplementedDBServerServer
 // for forward compatibility.
@@ -78,6 +90,7 @@ type DBServerServer interface {
 	Set(context.Context, *SetRequest) (*SetResponse, error)
 	Get(context.Context, *GetRequest) (*GetResponse, error)
 	Delete(context.Context, *DeleteRequest) (*DeleteResponse, error)
+	HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
 	mustEmbedUnimplementedDBServerServer()
 }
 
@@ -96,6 +109,9 @@ func (UnimplementedDBServerServer) Get(context.Context, *GetRequest) (*GetRespon
 }
 func (UnimplementedDBServerServer) Delete(context.Context, *DeleteRequest) (*DeleteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedDBServerServer) HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HealthCheck not implemented")
 }
 func (UnimplementedDBServerServer) mustEmbedUnimplementedDBServerServer() {}
 func (UnimplementedDBServerServer) testEmbeddedByValue()                  {}
@@ -172,6 +188,24 @@ func _DBServer_Delete_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DBServer_HealthCheck_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(HealthCheckRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DBServerServer).HealthCheck(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DBServer_HealthCheck_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DBServerServer).HealthCheck(ctx, req.(*HealthCheckRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // DBServer_ServiceDesc is the grpc.ServiceDesc for DBServer service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -190,6 +224,10 @@ var DBServer_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _DBServer_Delete_Handler,
+		},
+		{
+			MethodName: "HealthCheck",
+			Handler:    _DBServer_HealthCheck_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -53,6 +53,11 @@ func (s *Server) Stop() {
 	s.grpc.GracefulStop()
 }
 
+// ToDo: HealthCheck implementation - currently always returns healthy
+func (s *Server) HealthCheck(ctx context.Context, req *db_server.HealthCheckRequest) (*db_server.HealthCheckResponse, error) {
+	return &db_server.HealthCheckResponse{Healthy: true}, nil
+}
+
 // Get retrieves the value for a given key from the database
 func (s *Server) Get(ctx context.Context, req *db_server.GetRequest) (*db_server.GetResponse, error) {
 	val, err := s.db.GetKey(req.Key)
