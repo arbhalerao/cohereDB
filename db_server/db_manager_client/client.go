@@ -21,12 +21,11 @@ func NewDBManagerClient(managerAddr, region string) *DBManagerClient {
 }
 
 // RegisterWithManager attempts to register the DB server with db_manager and signals success.
-func (c *DBManagerClient) RegisterWithManager(region, httpAddr, grpcAddr string, ready chan<- bool) {
+func (c *DBManagerClient) RegisterWithManager(region, grpcAddr string, ready chan<- bool) {
 	retries := 0
 	for {
 		data := map[string]string{
 			"region":    region,
-			"http_addr": httpAddr,
 			"grpc_addr": grpcAddr,
 		}
 		payload, _ := json.Marshal(data)
