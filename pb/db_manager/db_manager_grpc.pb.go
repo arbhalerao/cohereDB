@@ -19,9 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DBManager_Set_FullMethodName    = "/pb.DBManager/Set"
-	DBManager_Get_FullMethodName    = "/pb.DBManager/Get"
-	DBManager_Delete_FullMethodName = "/pb.DBManager/Delete"
+	DBManager_Set_FullMethodName    = "/db_manager.DBManager/Set"
+	DBManager_Get_FullMethodName    = "/db_manager.DBManager/Get"
+	DBManager_Delete_FullMethodName = "/db_manager.DBManager/Delete"
 )
 
 // DBManagerClient is the client API for DBManager service.
@@ -176,7 +176,7 @@ func _DBManager_Delete_Handler(srv interface{}, ctx context.Context, dec func(in
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var DBManager_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "pb.DBManager",
+	ServiceName: "db_manager.DBManager",
 	HandlerType: (*DBManagerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
