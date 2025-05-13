@@ -1,0 +1,85 @@
+services:
+  db_manager:
+    build:
+      context: .
+      dockerfile: Dockerfile.manager
+    ports:
+      - "9090:9090"  # gRPC
+      - "8090:8090"  # HTTP
+    volumes:
+      - ./config:/app/config
+      - ./logs:/app/logs
+    environment:
+      - CONFIG_PATH=/app/config/manager.toml
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - coheredb
+
+  db_server_pune:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    ports:
+      - "52000:52000"
+    volumes:
+      - ./config:/app/config
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      - CONFIG_PATH=/app/config/server0.toml
+      - REGISTER=true
+    depends_on:
+      db_manager:
+        condition: service_healthy
+    networks:
+      - coheredb
+
+  db_server_mumbai:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    ports:
+      - "52001:52001"
+    volumes:
+      - ./config:/app/config
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      - CONFIG_PATH=/app/config/server1.toml
+      - REGISTER=true
+    depends_on:
+      db_manager:
+        condition: service_healthy
+    networks:
+      - coheredb
+
+  db_server_bangalore:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    ports:
+      - "52002:52002"
+    volumes:
+      - ./config:/app/config
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      - CONFIG_PATH=/app/config/server2.toml
+      - REGISTER=true
+    depends_on:
+      db_manager:
+        condition: service_healthy
+    networks:
+      - coheredb
+
+networks:
+  coheredb:
+    driver: bridge
+
+volumes:
+  data:
+  logs:

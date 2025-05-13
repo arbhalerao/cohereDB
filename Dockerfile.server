@@ -1,0 +1,35 @@
+FROM golang:1.22-alpine AS builder
+
+WORKDIR /app
+
+RUN apk add --no-cache git protobuf protobuf-dev
+
+COPY go.mod go.sum ./
+COPY db_server/go.mod db_server/go.sum ./db_server/
+COPY db/go.mod db/go.sum ./db/
+COPY utils/go.mod utils/go.sum ./utils/
+COPY pb/go.mod pb/go.sum ./pb/
+
+RUN go mod download
+RUN cd db_server && go mod download
+RUN cd db && go mod download
+RUN cd utils && go mod download
+RUN cd pb && go mod download
+
+COPY . .
+
+RUN cd db_server && go build -o /app/bin/db_server ./cmd/main.go
+
+FROM alpine:latest
+
+WORKDIR /app
+
+RUN apk add --no-cache ca-certificates
+
+COPY --from=builder /app/bin/db_server /app/db_server
+
+RUN mkdir -p /app/config /app/data /app/logs
+
+EXPOSE 52000
+
+CMD ["/app/db_server", "-config=/app/config/server0.toml", "-register=true"]
