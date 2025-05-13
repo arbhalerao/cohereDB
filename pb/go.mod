@@ -1,4 +1,4 @@
-module github.com/arbha1erao/cohereDB/pb
+module github.com/arbhalerao/cohereDB/pb
 
 go 1.22.0
 

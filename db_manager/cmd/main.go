@@ -10,9 +10,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/arbha1erao/cohereDB/db_manager/internal"
-	grpc_server "github.com/arbha1erao/cohereDB/db_manager/server/grpc"
-	"github.com/arbha1erao/cohereDB/utils"
+	"github.com/arbhalerao/cohereDB/db_manager/internal"
+	grpc_server "github.com/arbhalerao/cohereDB/db_manager/server/grpc"
+	"github.com/arbhalerao/cohereDB/utils"
 	"github.com/google/uuid"
 )
 

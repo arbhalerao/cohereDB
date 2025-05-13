@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/arbha1erao/cohereDB/pb/db_manager"
+	"github.com/arbhalerao/cohereDB/pb/db_manager"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

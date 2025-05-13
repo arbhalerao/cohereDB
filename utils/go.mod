@@ -1,4 +1,4 @@
-module github.com/arbha1erao/cohereDB/utils
+module github.com/arbhalerao/cohereDB/utils
 
 go 1.22.0
 

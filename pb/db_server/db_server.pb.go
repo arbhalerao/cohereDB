@@ -400,7 +400,7 @@ const file_db_server_proto_rawDesc = "" +
 	"\x03Set\x12\x15.db_server.SetRequest\x1a\x16.db_server.SetResponse\x124\n" +
 	"\x03Get\x12\x15.db_server.GetRequest\x1a\x16.db_server.GetResponse\x12=\n" +
 	"\x06Delete\x12\x18.db_server.DeleteRequest\x1a\x19.db_server.DeleteResponse\x12L\n" +
-	"\vHealthCheck\x12\x1d.db_server.HealthCheckRequest\x1a\x1e.db_server.HealthCheckResponseB-Z+github.com/arbha1erao/cohereDB/pb/db_serverb\x06proto3"
+	"\vHealthCheck\x12\x1d.db_server.HealthCheckRequest\x1a\x1e.db_server.HealthCheckResponseB-Z+github.com/arbhalerao/cohereDB/pb/db_serverb\x06proto3"
 
 var (
 	file_db_server_proto_rawDescOnce sync.Once

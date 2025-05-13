@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/arbha1erao/cohereDB/db"
-	"github.com/arbha1erao/cohereDB/utils"
+	"github.com/arbhalerao/cohereDB/db"
+	"github.com/arbhalerao/cohereDB/utils"
 )
 
 type Server struct {

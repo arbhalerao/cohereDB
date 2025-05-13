@@ -317,7 +317,7 @@ const file_db_manager_proto_rawDesc = "" +
 	"\tDBManager\x126\n" +
 	"\x03Set\x12\x16.db_manager.SetRequest\x1a\x17.db_manager.SetResponse\x126\n" +
 	"\x03Get\x12\x16.db_manager.GetRequest\x1a\x17.db_manager.GetResponse\x12?\n" +
-	"\x06Delete\x12\x19.db_manager.DeleteRequest\x1a\x1a.db_manager.DeleteResponseB.Z,github.com/arbha1erao/cohereDB/pb/db_managerb\x06proto3"
+	"\x06Delete\x12\x19.db_manager.DeleteRequest\x1a\x1a.db_manager.DeleteResponseB.Z,github.com/arbhalerao/cohereDB/pb/db_managerb\x06proto3"
 
 var (
 	file_db_manager_proto_rawDescOnce sync.Once

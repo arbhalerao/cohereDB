@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/arbha1erao/cohereDB/pb/db_server"
+	"github.com/arbhalerao/cohereDB/pb/db_server"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
