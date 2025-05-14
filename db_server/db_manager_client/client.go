@@ -20,7 +20,6 @@ func NewDBManagerClient(managerAddr, region string) *DBManagerClient {
 	}
 }
 
-// RegisterWithManager attempts to register the DB server with db_manager and signals success.
 func (c *DBManagerClient) RegisterWithManager(region, grpcAddr string, ready chan<- bool) {
 	retries := 0
 	for {

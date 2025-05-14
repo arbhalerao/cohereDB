@@ -12,7 +12,6 @@ type Database struct {
 	dbPath string
 }
 
-// NewDatabase returns a Database struct containing a BadgerDB instance
 func NewDatabase(path string) (*Database, error) {
 	badgerDb, err := badger.Open(badger.DefaultOptions(path))
 	if err != nil {
@@ -27,7 +26,6 @@ func NewDatabase(path string) (*Database, error) {
 	return db, nil
 }
 
-// Close closes the database connection
 func (d *Database) Close() error {
 	if d.db != nil {
 		return d.db.Close()
@@ -35,7 +33,6 @@ func (d *Database) Close() error {
 	return nil
 }
 
-// Cleanup closes the database connection and removes the database directory
 func (d *Database) Cleanup() error {
 	if err := d.Close(); err != nil {
 		return fmt.Errorf("failed to close database during cleanup: %v", err)
@@ -48,7 +45,6 @@ func (d *Database) Cleanup() error {
 	return nil
 }
 
-// GetKey retrieves the value associated with the provided key from the BadgerDB instance.
 func (d *Database) GetKey(key string) ([]byte, error) {
 	var valCopy []byte
 	err := d.db.View(func(txn *badger.Txn) error {
@@ -72,7 +68,6 @@ func (d *Database) GetKey(key string) ([]byte, error) {
 	return valCopy, nil
 }
 
-// SetKey sets the value associated with the provided key in the BadgerDB instance
 func (d *Database) SetKey(key string, value string) error {
 	err := d.db.Update(func(txn *badger.Txn) error {
 		e := badger.NewEntry([]byte(key), []byte(value))
@@ -88,7 +83,16 @@ func (d *Database) SetKey(key string, value string) error {
 	return nil
 }
 
-// DeleteKey removes the key-value pair associated with the provided key from the BadgerDB instance
+func (d *Database) IsHealthy() bool {
+	if d.db == nil || d.db.IsClosed() {
+		return false
+	}
+	err := d.db.View(func(txn *badger.Txn) error {
+		return nil
+	})
+	return err == nil
+}
+
 func (d *Database) DeleteKey(key string) error {
 	_, err := d.GetKey(key)
 	if err == badger.ErrKeyNotFound {

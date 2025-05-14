@@ -30,7 +30,6 @@ func NewServer(addr string, manager *internal.DBManager) *Server {
 	return s
 }
 
-// Start initializes the gRPC listener and starts the server.
 func (s *Server) Start() error {
 	listener, err := net.Listen("tcp", s.addr)
 	if err != nil {
@@ -47,13 +46,11 @@ func (s *Server) Start() error {
 	return nil
 }
 
-// Stop gracefully shuts down the gRPC server.
 func (s *Server) Stop() {
 	utils.Logger.Info().Msg("Shutting down gRPC server...")
 	s.grpc.GracefulStop()
 }
 
-// Get retrieves the value for a given key from the database
 func (s *Server) Get(ctx context.Context, req *db_manager.GetRequest) (*db_manager.GetResponse, error) {
 	val, err := s.manager.GetKey(req.Key)
 	if err != nil {
@@ -62,7 +59,6 @@ func (s *Server) Get(ctx context.Context, req *db_manager.GetRequest) (*db_manag
 	return &db_manager.GetResponse{Value: val}, nil
 }
 
-// Set stores the provided key-value pair in the database
 func (s *Server) Set(ctx context.Context, req *db_manager.SetRequest) (*db_manager.SetResponse, error) {
 	success, err := s.manager.SetKey(req.Key, req.Value)
 	if err != nil {
@@ -74,7 +70,6 @@ func (s *Server) Set(ctx context.Context, req *db_manager.SetRequest) (*db_manag
 	return &db_manager.SetResponse{Success: success}, nil
 }
 
-// Delete removes the key-value pair for the given key from the database
 func (s *Server) Delete(ctx context.Context, req *db_manager.DeleteRequest) (*db_manager.DeleteResponse, error) {
 	success, err := s.manager.DeleteKey(req.Key)
 	if err != nil {

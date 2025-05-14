@@ -30,7 +30,6 @@ func main() {
 	utils.NewLogger()
 	utils.Logger.Info().Msg("cohereDB server starting...")
 
-	// Load configuration
 	var config Config
 	err := utils.LoadTomlConfig(&config, *configPath)
 	if err != nil {
@@ -42,7 +41,6 @@ func main() {
 	grpcAddr := config.Server.GRPC_Addr
 	managerAddr := config.Server.MANAGER_Addr
 
-	// Initialize database
 	dbPath := fmt.Sprintf("../../data/db_%s", region)
 	database, err := db.NewDatabase(dbPath)
 	if err != nil {
@@ -55,30 +53,25 @@ func main() {
 		}
 	}()
 
-	// Initialize gRPC Server
 	grpcService := grpc_server.NewServer(database, grpcAddr)
 
-	// Use DBManagerClient for registration, if registration flag is set
 	ready := make(chan bool)
 	if *register {
 		managerClient := db_manager_client.NewDBManagerClient(managerAddr, region)
 		go managerClient.RegisterWithManager(region, grpcAddr, ready)
 
-		// Wait for registration to complete before proceeding
 		utils.Logger.Info().Msg("Waiting for registration with db_manager...")
 		<-ready
 		utils.Logger.Info().Msg("Registration successful. Starting servers...")
 	}
 	close(ready)
 
-	// Handle shutdown signals
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	// Start gRPC server
 	go func() {
 		defer wg.Done()
 		utils.Logger.Info().Msgf("Starting gRPC server on %s", grpcAddr)

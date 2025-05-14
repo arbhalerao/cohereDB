@@ -31,7 +31,6 @@ func NewDBManager() *DBManager {
 	}
 }
 
-// AddServer registers a new DB server, creates a gRPC connection, and updates the consistent hash ring
 func (m *DBManager) AddServer(uuid, region, addr string) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -60,7 +59,6 @@ func (m *DBManager) AddServer(uuid, region, addr string) bool {
 	return true
 }
 
-// RemoveServer unregisters a DB server, closes its connection, and updates the consistent hash ring.
 func (m *DBManager) RemoveServer(uuid string) bool {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -81,7 +79,6 @@ func (m *DBManager) RemoveServer(uuid string) bool {
 	return true
 }
 
-// HealthCheckServers verifies if registered DB servers are alive and removes unresponsive ones
 func (m *DBManager) HealthCheckServers() {
 	m.mu.Lock()
 	servers := make(map[string]dbServer, len(m.servers))
@@ -99,7 +96,6 @@ func (m *DBManager) HealthCheckServers() {
 		}
 	}
 
-	// Remove unresponsive servers
 	m.mu.Lock()
 	for _, uuid := range toRemove {
 		if server, exists := m.servers[uuid]; exists {
@@ -114,7 +110,6 @@ func (m *DBManager) HealthCheckServers() {
 	m.ReconcileServers()
 }
 
-// GetKey retrieves a value from the appropriate DB server
 func (m *DBManager) GetKey(key string) (string, error) {
 	m.mu.Lock()
 	uuid, exists := m.hasher.GetNode(key)
@@ -140,7 +135,6 @@ func (m *DBManager) GetKey(key string) (string, error) {
 	return resp.Value, nil
 }
 
-// SetKey stores a key-value pair on a specific DB server
 func (m *DBManager) SetKey(key, value string) (bool, error) {
 	m.mu.Lock()
 	uuid, exists := m.hasher.GetNode(key)
@@ -166,7 +160,6 @@ func (m *DBManager) SetKey(key, value string) (bool, error) {
 	return true, nil
 }
 
-// DeleteKey removes a key-value pair from a specific DB server
 func (m *DBManager) DeleteKey(key string) (bool, error) {
 	m.mu.Lock()
 	uuid, exists := m.hasher.GetNode(key)
@@ -192,7 +185,6 @@ func (m *DBManager) DeleteKey(key string) (bool, error) {
 	return true, nil
 }
 
-// ReconcileServers ensures the hash ring is updated with active servers
 func (m *DBManager) ReconcileServers() {
 	m.mu.Lock()
 	activeNodes := make([]string, 0, len(m.servers))

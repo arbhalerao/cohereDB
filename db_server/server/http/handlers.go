@@ -8,7 +8,6 @@ import (
 	"github.com/dgraph-io/badger"
 )
 
-// GetHandler retrieves the value for a given key from the database
 func (s *Server) GetHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -43,7 +42,6 @@ func (s *Server) GetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Set SetHandler the provided key-value pair in the database
 func (s *Server) SetHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -74,7 +72,6 @@ func (s *Server) SetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// DeleteHandler removes the key-value pair for the given key from the database
 func (s *Server) DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

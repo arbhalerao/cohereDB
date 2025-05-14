@@ -30,7 +30,6 @@ func NewServer(db *db.Database, addr string) *Server {
 	return s
 }
 
-// Start initializes the gRPC listener and starts the server.
 func (s *Server) Start() error {
 	listener, err := net.Listen("tcp", s.addr)
 	if err != nil {
@@ -47,18 +46,16 @@ func (s *Server) Start() error {
 	return nil
 }
 
-// Stop gracefully shuts down the gRPC server.
 func (s *Server) Stop() {
 	utils.Logger.Info().Msg("Shutting down gRPC server...")
 	s.grpc.GracefulStop()
 }
 
-// ToDo: HealthCheck implementation - currently always returns healthy
 func (s *Server) HealthCheck(ctx context.Context, req *db_server.HealthCheckRequest) (*db_server.HealthCheckResponse, error) {
-	return &db_server.HealthCheckResponse{Healthy: true}, nil
+	healthy := s.db.IsHealthy()
+	return &db_server.HealthCheckResponse{Healthy: healthy}, nil
 }
 
-// Get retrieves the value for a given key from the database
 func (s *Server) Get(ctx context.Context, req *db_server.GetRequest) (*db_server.GetResponse, error) {
 	val, err := s.db.GetKey(req.Key)
 	if err != nil {
@@ -68,7 +65,6 @@ func (s *Server) Get(ctx context.Context, req *db_server.GetRequest) (*db_server
 	return &db_server.GetResponse{Value: string(val)}, nil
 }
 
-// Set stores the provided key-value pair in the database
 func (s *Server) Set(ctx context.Context, req *db_server.SetRequest) (*db_server.SetResponse, error) {
 	err := s.db.SetKey(req.Key, req.Value)
 	if err != nil {
@@ -78,7 +74,6 @@ func (s *Server) Set(ctx context.Context, req *db_server.SetRequest) (*db_server
 	return &db_server.SetResponse{Success: true}, nil
 }
 
-// Delete removes the key-value pair for the given key from the database
 func (s *Server) Delete(ctx context.Context, req *db_server.DeleteRequest) (*db_server.DeleteResponse, error) {
 	err := s.db.DeleteKey(req.Key)
 	if err != nil {

@@ -29,7 +29,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Connect to DB Manager
 	conn, err := grpc.NewClient(*managerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		fmt.Printf("Failed to connect to DB Manager: %v\n", err)
