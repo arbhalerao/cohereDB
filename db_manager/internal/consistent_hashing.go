@@ -86,6 +86,39 @@ func (h *ConsistentHasher) GetNode(key string) (string, bool) {
 	return node, exists
 }
 
+func (h *ConsistentHasher) GetReplicaNodes(key string, count int) []string {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+
+	if len(h.ring) == 0 {
+		return nil
+	}
+
+	hash := h.hashKey(key)
+
+	idx := sort.Search(len(h.ring), func(i int) bool {
+		return h.ring[i] >= hash
+	})
+
+	if idx == len(h.ring) {
+		idx = 0
+	}
+
+	seen := make(map[string]struct{})
+	var nodes []string
+
+	for i := 0; i < len(h.ring) && len(nodes) < count; i++ {
+		pos := (idx + i) % len(h.ring)
+		node := h.keys[h.ring[pos]]
+		if _, ok := seen[node]; !ok {
+			seen[node] = struct{}{}
+			nodes = append(nodes, node)
+		}
+	}
+
+	return nodes
+}
+
 func (h *ConsistentHasher) Reconcile(nodes []string) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
