@@ -18,6 +18,8 @@ type dbServer struct {
 	client db_server.DBServerClient
 }
 
+const ReplicationFactor = 2
+
 type DBManager struct {
 	mu      sync.Mutex
 	servers map[string]dbServer
@@ -110,76 +112,90 @@ func (m *DBManager) HealthCheckServers() {
 	m.ReconcileServers()
 }
 
+func (m *DBManager) getReplicaServers(key string) ([]dbServer, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	uuids := m.hasher.GetReplicaNodes(key, ReplicationFactor)
+	if len(uuids) == 0 {
+		return nil, fmt.Errorf("no available database servers")
+	}
+
+	var servers []dbServer
+	for _, uuid := range uuids {
+		if server, exists := m.servers[uuid]; exists {
+			servers = append(servers, server)
+		}
+	}
+
+	if len(servers) == 0 {
+		return nil, fmt.Errorf("no reachable servers for key %q", key)
+	}
+
+	return servers, nil
+}
+
 func (m *DBManager) GetKey(key string) (string, error) {
-	m.mu.Lock()
-	uuid, exists := m.hasher.GetNode(key)
-	m.mu.Unlock()
-
-	if !exists {
-		return "", fmt.Errorf("no available database servers")
-	}
-
-	m.mu.Lock()
-	server, serverExists := m.servers[uuid]
-	m.mu.Unlock()
-
-	if !serverExists {
-		return "", fmt.Errorf("server not found: %s", uuid)
-	}
-
-	resp, err := server.client.Get(context.Background(), &db_server.GetRequest{Key: key})
+	servers, err := m.getReplicaServers(key)
 	if err != nil {
 		return "", err
 	}
 
-	return resp.Value, nil
+	var lastErr error
+	for _, server := range servers {
+		resp, err := server.client.Get(context.Background(), &db_server.GetRequest{Key: key})
+		if err == nil {
+			return resp.Value, nil
+		}
+		lastErr = err
+	}
+
+	return "", fmt.Errorf("all replicas failed for key %q: %v", key, lastErr)
 }
 
 func (m *DBManager) SetKey(key, value string) (bool, error) {
-	m.mu.Lock()
-	uuid, exists := m.hasher.GetNode(key)
-	m.mu.Unlock()
-
-	if !exists {
-		return false, fmt.Errorf("no available database servers")
-	}
-
-	m.mu.Lock()
-	server, serverExists := m.servers[uuid]
-	m.mu.Unlock()
-
-	if !serverExists {
-		return false, fmt.Errorf("server not found: %s", uuid)
-	}
-
-	_, err := server.client.Set(context.Background(), &db_server.SetRequest{Key: key, Value: value})
+	servers, err := m.getReplicaServers(key)
 	if err != nil {
 		return false, err
+	}
+
+	successCount := 0
+	var lastErr error
+	for _, server := range servers {
+		_, err := server.client.Set(context.Background(), &db_server.SetRequest{Key: key, Value: value})
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		successCount++
+	}
+
+	if successCount == 0 {
+		return false, fmt.Errorf("failed to write to any replica for key %q: %v", key, lastErr)
 	}
 
 	return true, nil
 }
 
 func (m *DBManager) DeleteKey(key string) (bool, error) {
-	m.mu.Lock()
-	uuid, exists := m.hasher.GetNode(key)
-	m.mu.Unlock()
-
-	if !exists {
-		return false, fmt.Errorf("no available database servers")
-	}
-
-	m.mu.Lock()
-	server, serverExists := m.servers[uuid]
-	m.mu.Unlock()
-
-	if !serverExists {
-		return false, fmt.Errorf("server not found: %s", uuid)
-	}
-
-	_, err := server.client.Delete(context.Background(), &db_server.DeleteRequest{Key: key})
+	servers, err := m.getReplicaServers(key)
 	if err != nil {
 		return false, err
+	}
+
+	successCount := 0
+	var lastErr error
+	for _, server := range servers {
+		_, err := server.client.Delete(context.Background(), &db_server.DeleteRequest{Key: key})
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		successCount++
+	}
+
+	if successCount == 0 {
+		return false, fmt.Errorf("failed to delete from any replica for key %q: %v", key, lastErr)
 	}
 
 	return true, nil
