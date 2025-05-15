@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/arbhalerao/cohereDB/pb/db_server"
 	"google.golang.org/grpc"
@@ -57,6 +58,7 @@ func (m *DBManager) AddServer(uuid, region, addr string) bool {
 	}
 
 	m.hasher.AddNode(uuid)
+	ActiveServers.Inc()
 
 	return true
 }
@@ -77,6 +79,7 @@ func (m *DBManager) RemoveServer(uuid string) bool {
 	delete(m.servers, uuid)
 
 	m.hasher.RemoveNode(uuid)
+	ActiveServers.Dec()
 
 	return true
 }
@@ -136,8 +139,14 @@ func (m *DBManager) getReplicaServers(key string) ([]dbServer, error) {
 }
 
 func (m *DBManager) GetKey(key string) (string, error) {
+	start := time.Now()
+	defer func() {
+		RequestDuration.WithLabelValues("get").Observe(time.Since(start).Seconds())
+	}()
+
 	servers, err := m.getReplicaServers(key)
 	if err != nil {
+		RequestsTotal.WithLabelValues("get", "error").Inc()
 		return "", err
 	}
 
@@ -145,17 +154,25 @@ func (m *DBManager) GetKey(key string) (string, error) {
 	for _, server := range servers {
 		resp, err := server.client.Get(context.Background(), &db_server.GetRequest{Key: key})
 		if err == nil {
+			RequestsTotal.WithLabelValues("get", "success").Inc()
 			return resp.Value, nil
 		}
 		lastErr = err
 	}
 
+	RequestsTotal.WithLabelValues("get", "error").Inc()
 	return "", fmt.Errorf("all replicas failed for key %q: %v", key, lastErr)
 }
 
 func (m *DBManager) SetKey(key, value string) (bool, error) {
+	start := time.Now()
+	defer func() {
+		RequestDuration.WithLabelValues("set").Observe(time.Since(start).Seconds())
+	}()
+
 	servers, err := m.getReplicaServers(key)
 	if err != nil {
+		RequestsTotal.WithLabelValues("set", "error").Inc()
 		return false, err
 	}
 
@@ -165,21 +182,31 @@ func (m *DBManager) SetKey(key, value string) (bool, error) {
 		_, err := server.client.Set(context.Background(), &db_server.SetRequest{Key: key, Value: value})
 		if err != nil {
 			lastErr = err
+			ReplicationWrites.WithLabelValues("failure").Inc()
 			continue
 		}
 		successCount++
+		ReplicationWrites.WithLabelValues("success").Inc()
 	}
 
 	if successCount == 0 {
+		RequestsTotal.WithLabelValues("set", "error").Inc()
 		return false, fmt.Errorf("failed to write to any replica for key %q: %v", key, lastErr)
 	}
 
+	RequestsTotal.WithLabelValues("set", "success").Inc()
 	return true, nil
 }
 
 func (m *DBManager) DeleteKey(key string) (bool, error) {
+	start := time.Now()
+	defer func() {
+		RequestDuration.WithLabelValues("delete").Observe(time.Since(start).Seconds())
+	}()
+
 	servers, err := m.getReplicaServers(key)
 	if err != nil {
+		RequestsTotal.WithLabelValues("delete", "error").Inc()
 		return false, err
 	}
 
@@ -195,9 +222,11 @@ func (m *DBManager) DeleteKey(key string) (bool, error) {
 	}
 
 	if successCount == 0 {
+		RequestsTotal.WithLabelValues("delete", "error").Inc()
 		return false, fmt.Errorf("failed to delete from any replica for key %q: %v", key, lastErr)
 	}
 
+	RequestsTotal.WithLabelValues("delete", "success").Inc()
 	return true, nil
 }
 
