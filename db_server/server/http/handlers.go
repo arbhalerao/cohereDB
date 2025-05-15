@@ -34,7 +34,7 @@ func (s *Server) GetHandler(w http.ResponseWriter, r *http.Request) {
 
 	utils.Logger.Info().Msgf("[GET] Successfully retrieved key %s", key)
 
-	response := fmt.Sprintf(`{%q}`, value)
+	response := fmt.Sprintf(`{"key": %q, "value": %q}`, key, string(value))
 	_, err = w.Write([]byte(response))
 	if err != nil {
 		utils.Logger.Error().Msgf("Error writing response for key '%s': %v", key, err)

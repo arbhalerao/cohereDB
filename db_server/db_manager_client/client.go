@@ -10,6 +10,12 @@ import (
 	"github.com/arbhalerao/cohereDB/utils"
 )
 
+const (
+	MaxRetries     = 10
+	MaxBackoff     = 30 * time.Second
+	InitialBackoff = 1 * time.Second
+)
+
 type DBManagerClient struct {
 	managerAddr string
 }
@@ -21,8 +27,9 @@ func NewDBManagerClient(managerAddr, region string) *DBManagerClient {
 }
 
 func (c *DBManagerClient) RegisterWithManager(region, grpcAddr string, ready chan<- bool) {
-	retries := 0
-	for {
+	backoff := InitialBackoff
+
+	for attempt := 1; attempt <= MaxRetries; attempt++ {
 		data := map[string]string{
 			"region":    region,
 			"grpc_addr": grpcAddr,
@@ -41,8 +48,17 @@ func (c *DBManagerClient) RegisterWithManager(region, grpcAddr string, ready cha
 			resp.Body.Close()
 		}
 
-		utils.Logger.Warn().Msgf("Failed to register with db_manager (%s), retrying... (%d)", c.managerAddr, retries+1)
-		retries++
-		time.Sleep(time.Duration(retries) * time.Second) // Exponential backoff
+		utils.Logger.Warn().Msgf("Failed to register with db_manager (%s), attempt %d/%d, retrying in %v...",
+			c.managerAddr, attempt, MaxRetries, backoff)
+
+		time.Sleep(backoff)
+
+		backoff *= 2
+		if backoff > MaxBackoff {
+			backoff = MaxBackoff
+		}
 	}
+
+	utils.Logger.Error().Msgf("Failed to register with db_manager after %d attempts", MaxRetries)
+	ready <- false
 }
