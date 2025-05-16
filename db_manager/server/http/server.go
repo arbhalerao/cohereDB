@@ -9,6 +9,7 @@ import (
 	"github.com/arbhalerao/cohereDB/db_manager/internal"
 	"github.com/arbhalerao/cohereDB/utils"
 	"github.com/google/uuid"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type Server struct {
@@ -42,7 +43,8 @@ func NewServer(manager *internal.DBManager, addr string) *Server {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/register", s.registerHandler)
 	mux.HandleFunc("/health", s.healthHandler)
-	mux.HandleFunc("/servers", s.serversHandler)
+	mux.HandleFunc("/cluster", s.clusterHandler)
+	mux.Handle("/metrics", promhttp.Handler())
 
 	s.server = &http.Server{
 		Addr:    addr,
@@ -114,15 +116,20 @@ func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func (s *Server) serversHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) clusterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
+	servers := s.manager.GetClusterStatus()
+
 	response := map[string]interface{}{
-		"message": "Server list endpoint - implementation pending",
-		"status":  "ok",
+		"status":             "healthy",
+		"server_count":       len(servers),
+		"replication_factor": internal.ReplicationFactor,
+		"servers":            servers,
+		"time":               time.Now().Format(time.RFC3339),
 	}
 
 	w.Header().Set("Content-Type", "application/json")

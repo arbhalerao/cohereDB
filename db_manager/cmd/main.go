@@ -14,6 +14,7 @@ import (
 	grpc_server "github.com/arbhalerao/cohereDB/db_manager/server/grpc"
 	"github.com/arbhalerao/cohereDB/utils"
 	"github.com/google/uuid"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type Config struct {
@@ -41,6 +42,8 @@ func NewManagerServer(manager *internal.DBManager, httpAddr string) *ManagerServ
 	mux := http.NewServeMux()
 	mux.HandleFunc("/register", ms.registerHandler)
 	mux.HandleFunc("/health", ms.healthHandler)
+	mux.HandleFunc("/cluster", ms.clusterHandler)
+	mux.Handle("/metrics", promhttp.Handler())
 
 	ms.httpServer = &http.Server{
 		Addr:    httpAddr,
@@ -89,6 +92,19 @@ func (ms *ManagerServer) healthHandler(w http.ResponseWriter, r *http.Request) {
 	response := map[string]interface{}{
 		"status": "healthy",
 		"time":   time.Now().Format(time.RFC3339),
+	}
+	json.NewEncoder(w).Encode(response)
+}
+
+func (ms *ManagerServer) clusterHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	servers := ms.manager.GetClusterStatus()
+	response := map[string]interface{}{
+		"status":             "healthy",
+		"server_count":       len(servers),
+		"replication_factor": internal.ReplicationFactor,
+		"servers":            servers,
+		"time":               time.Now().Format(time.RFC3339),
 	}
 	json.NewEncoder(w).Encode(response)
 }

@@ -230,6 +230,33 @@ func (m *DBManager) DeleteKey(key string) (bool, error) {
 	return true, nil
 }
 
+type ServerInfo struct {
+	UUID   string `json:"uuid"`
+	Region string `json:"region"`
+	Addr   string `json:"addr"`
+}
+
+func (m *DBManager) GetClusterStatus() []ServerInfo {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	servers := make([]ServerInfo, 0, len(m.servers))
+	for _, s := range m.servers {
+		servers = append(servers, ServerInfo{
+			UUID:   s.uuid,
+			Region: s.region,
+			Addr:   s.addr,
+		})
+	}
+	return servers
+}
+
+func (m *DBManager) ServerCount() int {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return len(m.servers)
+}
+
 func (m *DBManager) ReconcileServers() {
 	m.mu.Lock()
 	activeNodes := make([]string, 0, len(m.servers))

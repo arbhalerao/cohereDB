@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"sync"
@@ -11,6 +12,7 @@ import (
 	"github.com/arbhalerao/cohereDB/db"
 	"github.com/arbhalerao/cohereDB/db_server/db_manager_client"
 	grpc_server "github.com/arbhalerao/cohereDB/db_server/server/grpc"
+	http_server "github.com/arbhalerao/cohereDB/db_server/server/http"
 	"github.com/arbhalerao/cohereDB/utils"
 )
 
@@ -18,6 +20,7 @@ type Config struct {
 	Server struct {
 		Region       string `toml:"region"`
 		GRPC_Addr    string `toml:"grpc_addr"`
+		HTTP_Addr    string `toml:"http_addr"`
 		MANAGER_Addr string `toml:"manager_addr"`
 	} `toml:"server"`
 }
@@ -53,6 +56,8 @@ func main() {
 		}
 	}()
 
+	httpAddr := config.Server.HTTP_Addr
+
 	grpcService := grpc_server.NewServer(database, grpcAddr)
 
 	ready := make(chan bool)
@@ -80,10 +85,27 @@ func main() {
 		}
 	}()
 
+	var httpService *http_server.Server
+	if httpAddr != "" {
+		httpService = http_server.NewServer(database, httpAddr)
+		httpService.RegisterHandlers()
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if err := httpService.Start(); err != nil && err != http.ErrServerClosed {
+				utils.Logger.Fatal().Err(err).Msg("HTTP server failed")
+			}
+		}()
+	}
+
 	<-stop
 	utils.Logger.Info().Msg("Shutting down servers...")
 
 	grpcService.Stop()
+	if httpService != nil {
+		httpService.Shutdown()
+	}
 
 	wg.Wait()
 
