@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/arbhalerao/cohereDB/pb/db_server"
+	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -36,18 +37,24 @@ func NewDBManager() *DBManager {
 
 func (m *DBManager) AddServer(uuid, region, addr string) bool {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 
 	if _, exists := m.servers[uuid]; exists {
+		m.mu.Unlock()
 		return false
 	}
 
 	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
+		m.mu.Unlock()
 		return false
 	}
 
 	client := db_server.NewDBServerClient(conn)
+
+	existingServers := make([]dbServer, 0, len(m.servers))
+	for _, s := range m.servers {
+		existingServers = append(existingServers, s)
+	}
 
 	m.servers[uuid] = dbServer{
 		uuid:   uuid,
@@ -59,27 +66,34 @@ func (m *DBManager) AddServer(uuid, region, addr string) bool {
 
 	m.hasher.AddNode(uuid)
 	ActiveServers.Inc()
+	m.mu.Unlock()
+
+	if len(existingServers) > 0 {
+		go m.migrateKeysOnNodeAdd(uuid, existingServers)
+	}
 
 	return true
 }
 
 func (m *DBManager) RemoveServer(uuid string) bool {
 	m.mu.Lock()
-	defer m.mu.Unlock()
-
 	server, exists := m.servers[uuid]
 	if !exists {
+		m.mu.Unlock()
 		return false
 	}
+	m.mu.Unlock()
 
+	m.migrateKeysOnNodeRemove(uuid, server)
+
+	m.mu.Lock()
 	if server.conn != nil {
 		server.conn.Close()
 	}
-
 	delete(m.servers, uuid)
-
 	m.hasher.RemoveNode(uuid)
 	ActiveServers.Dec()
+	m.mu.Unlock()
 
 	return true
 }
@@ -101,16 +115,26 @@ func (m *DBManager) HealthCheckServers() {
 		}
 	}
 
-	m.mu.Lock()
 	for _, uuid := range toRemove {
-		if server, exists := m.servers[uuid]; exists {
-			if server.conn != nil {
-				server.conn.Close()
+		m.mu.Lock()
+		server, exists := m.servers[uuid]
+		if !exists {
+			m.mu.Unlock()
+			continue
+		}
+		m.mu.Unlock()
+
+		m.migrateKeysOnNodeRemove(uuid, server)
+
+		m.mu.Lock()
+		if s, ok := m.servers[uuid]; ok {
+			if s.conn != nil {
+				s.conn.Close()
 			}
 			delete(m.servers, uuid)
 		}
+		m.mu.Unlock()
 	}
-	m.mu.Unlock()
 
 	m.ReconcileServers()
 }
@@ -266,4 +290,118 @@ func (m *DBManager) ReconcileServers() {
 	m.mu.Unlock()
 
 	m.hasher.Reconcile(activeNodes)
+}
+
+func (m *DBManager) migrateKeysOnNodeAdd(newUUID string, existingServers []dbServer) {
+	log.Info().Msgf("Starting key migration for new node %s", newUUID)
+	migrated := 0
+
+	for _, oldServer := range existingServers {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		resp, err := oldServer.client.ListKeys(ctx, &db_server.ListKeysRequest{})
+		cancel()
+		if err != nil {
+			log.Warn().Err(err).Msgf("Failed to list keys on server %s during migration", oldServer.uuid)
+			continue
+		}
+
+		for _, pair := range resp.Pairs {
+			primaryNode, ok := m.hasher.GetNode(pair.Key)
+			if !ok || primaryNode != newUUID {
+				replicas := m.hasher.GetReplicaNodes(pair.Key, ReplicationFactor)
+				isReplica := false
+				for _, r := range replicas {
+					if r == newUUID {
+						isReplica = true
+						break
+					}
+				}
+				if !isReplica {
+					continue
+				}
+			}
+
+			m.mu.Lock()
+			newServer, exists := m.servers[newUUID]
+			m.mu.Unlock()
+			if !exists {
+				log.Error().Msgf("New server %s disappeared during migration", newUUID)
+				return
+			}
+
+			ctx2, cancel2 := context.WithTimeout(context.Background(), 5*time.Second)
+			_, err := newServer.client.Set(ctx2, &db_server.SetRequest{Key: pair.Key, Value: pair.Value})
+			cancel2()
+			if err != nil {
+				log.Warn().Err(err).Msgf("Failed to migrate key %q to new node %s", pair.Key, newUUID)
+				continue
+			}
+
+			replicas := m.hasher.GetReplicaNodes(pair.Key, ReplicationFactor)
+			oldIsReplica := false
+			for _, r := range replicas {
+				if r == oldServer.uuid {
+					oldIsReplica = true
+					break
+				}
+			}
+			if !oldIsReplica {
+				ctx3, cancel3 := context.WithTimeout(context.Background(), 5*time.Second)
+				oldServer.client.Delete(ctx3, &db_server.DeleteRequest{Key: pair.Key})
+				cancel3()
+			}
+
+			migrated++
+		}
+	}
+
+	KeysMigrated.WithLabelValues("node_add").Add(float64(migrated))
+	log.Info().Msgf("Key migration for new node %s completed: %d keys migrated", newUUID, migrated)
+}
+
+func (m *DBManager) migrateKeysOnNodeRemove(uuid string, server dbServer) {
+	log.Info().Msgf("Draining keys from node %s before removal", uuid)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	resp, err := server.client.ListKeys(ctx, &db_server.ListKeysRequest{})
+	cancel()
+	if err != nil {
+		log.Warn().Err(err).Msgf("Failed to list keys on dying server %s — data may be lost (replicas may still have copies)", uuid)
+		return
+	}
+
+	if len(resp.Pairs) == 0 {
+		log.Info().Msgf("No keys to drain from node %s", uuid)
+		return
+	}
+
+	migrated := 0
+	for _, pair := range resp.Pairs {
+		replicas := m.hasher.GetReplicaNodes(pair.Key, ReplicationFactor+1)
+
+		for _, replicaUUID := range replicas {
+			if replicaUUID == uuid {
+				continue // skip the dying server
+			}
+
+			m.mu.Lock()
+			target, exists := m.servers[replicaUUID]
+			m.mu.Unlock()
+			if !exists {
+				continue
+			}
+
+			ctx2, cancel2 := context.WithTimeout(context.Background(), 5*time.Second)
+			_, err := target.client.Set(ctx2, &db_server.SetRequest{Key: pair.Key, Value: pair.Value})
+			cancel2()
+			if err != nil {
+				log.Warn().Err(err).Msgf("Failed to migrate key %q to server %s", pair.Key, replicaUUID)
+				continue
+			}
+		}
+		migrated++
+	}
+
+	KeysMigrated.WithLabelValues("node_remove").Add(float64(migrated))
+	log.Info().Msgf("Drained %d keys from node %s", migrated, uuid)
 }

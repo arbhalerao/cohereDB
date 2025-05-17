@@ -30,4 +30,10 @@ var (
 		Name:      "replication_writes_total",
 		Help:      "Total replication write attempts",
 	}, []string{"status"})
+
+	KeysMigrated = promauto.NewCounterVec(prometheus.CounterOpts{
+		Namespace: "coheredb",
+		Name:      "keys_migrated_total",
+		Help:      "Total number of keys migrated during node add/remove",
+	}, []string{"event"})
 )
