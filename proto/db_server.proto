@@ -9,6 +9,7 @@ service DBServer {
   rpc Get(GetRequest) returns (GetResponse);
   rpc Delete(DeleteRequest) returns (DeleteResponse);
   rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+  rpc ListKeys(ListKeysRequest) returns (ListKeysResponse);
 }
 
 message SetRequest {
@@ -40,4 +41,15 @@ message HealthCheckRequest {}
 
 message HealthCheckResponse {
   bool healthy = 1;
+}
+
+message ListKeysRequest {}
+
+message KeyValuePair {
+  string key = 1;
+  string value = 2;
+}
+
+message ListKeysResponse {
+  repeated KeyValuePair pairs = 1;
 }

@@ -82,3 +82,20 @@ func (s *Server) Delete(ctx context.Context, req *db_server.DeleteRequest) (*db_
 
 	return &db_server.DeleteResponse{Success: true}, nil
 }
+
+func (s *Server) ListKeys(ctx context.Context, req *db_server.ListKeysRequest) (*db_server.ListKeysResponse, error) {
+	pairs, err := s.db.GetAllKeys()
+	if err != nil {
+		return nil, fmt.Errorf("failed to list keys: %v", err)
+	}
+
+	pbPairs := make([]*db_server.KeyValuePair, len(pairs))
+	for i, p := range pairs {
+		pbPairs[i] = &db_server.KeyValuePair{
+			Key:   p.Key,
+			Value: p.Value,
+		}
+	}
+
+	return &db_server.ListKeysResponse{Pairs: pbPairs}, nil
+}

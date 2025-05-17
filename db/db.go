@@ -93,6 +93,42 @@ func (d *Database) IsHealthy() bool {
 	return err == nil
 }
 
+type KeyValuePair struct {
+	Key   string
+	Value string
+}
+
+func (d *Database) GetAllKeys() ([]KeyValuePair, error) {
+	var pairs []KeyValuePair
+
+	err := d.db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		it := txn.NewIterator(opts)
+		defer it.Close()
+
+		for it.Rewind(); it.Valid(); it.Next() {
+			item := it.Item()
+			key := string(item.Key())
+
+			val, err := item.ValueCopy(nil)
+			if err != nil {
+				return fmt.Errorf("failed to copy value for key '%s': %v", key, err)
+			}
+
+			pairs = append(pairs, KeyValuePair{
+				Key:   key,
+				Value: string(val),
+			})
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to iterate over keys: %v", err)
+	}
+
+	return pairs, nil
+}
+
 func (d *Database) DeleteKey(key string) error {
 	_, err := d.GetKey(key)
 	if err == badger.ErrKeyNotFound {
