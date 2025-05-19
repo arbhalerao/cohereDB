@@ -1,4 +1,4 @@
-name: linter
+name: CI
 
 on:
   push:
@@ -11,7 +11,28 @@ permissions:
   pull-requests: read
 
 jobs:
-  golangci:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Run unit tests
+        run: |
+          MODULES=("db" "db_manager")
+          for dir in "${MODULES[@]}"; do
+            echo "Running tests in $dir..."
+            (cd "$dir" && go test ./... -v -count=1)
+          done
+
+  lint:
     name: lint
     runs-on: ubuntu-latest
 
@@ -19,10 +40,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Go 1.22
+      - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.22
+          go-version: "1.23"
 
       - name: Install golangci-lint
         run: |

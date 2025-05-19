@@ -32,6 +32,18 @@ install:
 	go get google.golang.org/protobuf/cmd/protoc-gen-go
 	go get google.golang.org/grpc/cmd/protoc-gen-go-grpc
 
+unit-test:
+	@echo "Running unit tests..."
+	@(cd db && go test ./... -v -count=1)
+	@(cd db_manager && go test ./internal/ -v -count=1)
+	@echo "All unit tests passed!"
+
+bench:
+	@echo "Running benchmarks..."
+	@(cd db && go test ./... -bench=. -benchmem -run='^$$')
+	@(cd db_manager && go test ./internal/ -bench=. -benchmem -run='^$$')
+	@echo "Benchmarks completed!"
+
 lint:
 	@echo "Running lint on db..."
 	@(cd db && golangci-lint run)
@@ -82,4 +94,4 @@ generate: generate-db-server generate-db-manager
 
 all: generate build
 
-.PHONY: generate-db-server generate-db-manager clean install lint build start stop test setup generate all
+.PHONY: generate-db-server generate-db-manager clean install lint unit-test bench build start stop test setup generate all
