@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/arbha1erao/cohereDB/db_manager/internal"
-	"github.com/arbha1erao/cohereDB/utils"
+	"github.com/arbhalerao/cohereDB/db_manager/internal"
+	"github.com/arbhalerao/cohereDB/utils"
 	"github.com/google/uuid"
 )
 

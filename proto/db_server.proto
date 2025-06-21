@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package db_server;
 
-option go_package = "github.com/arbha1erao/cohereDB/pb/db_server";
+option go_package = "github.com/arbhalerao/cohereDB/pb/db_server";
 
 service DBServer {
   rpc Set(SetRequest) returns (SetResponse);

@@ -1,19 +1,19 @@
-module github.com/arbha1erao/cohereDB/db_server
+module github.com/arbhalerao/cohereDB/db_server
 
 go 1.22.0
 
-replace github.com/arbha1erao/cohereDB/db => ../db
+replace github.com/arbhalerao/cohereDB/db => ../db
 
-replace github.com/arbha1erao/cohereDB/utils => ../utils
+replace github.com/arbhalerao/cohereDB/utils => ../utils
 
-replace github.com/arbha1erao/cohereDB/config => ../config
+replace github.com/arbhalerao/cohereDB/config => ../config
 
-replace github.com/arbha1erao/cohereDB/pb => ../pb
+replace github.com/arbhalerao/cohereDB/pb => ../pb
 
 require (
-	github.com/arbha1erao/cohereDB/db v0.0.0-00010101000000-000000000000
-	github.com/arbha1erao/cohereDB/pb v0.0.0-00010101000000-000000000000
-	github.com/arbha1erao/cohereDB/utils v0.0.0-00010101000000-000000000000
+	github.com/arbhalerao/cohereDB/db v0.0.0-00010101000000-000000000000
+	github.com/arbhalerao/cohereDB/pb v0.0.0-00010101000000-000000000000
+	github.com/arbhalerao/cohereDB/utils v0.0.0-00010101000000-000000000000
 	github.com/dgraph-io/badger v1.6.2
 	google.golang.org/grpc v1.70.0
 )

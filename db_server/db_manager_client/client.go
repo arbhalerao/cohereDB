@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/arbha1erao/cohereDB/utils"
+	"github.com/arbhalerao/cohereDB/utils"
 )
 
 type DBManagerClient struct {

@@ -1,11 +1,11 @@
-module github.com/arbha1erao/cohereDB/client
+module github.com/arbhalerao/cohereDB/client
 
 go 1.22.0
 
-replace github.com/arbha1erao/cohereDB/pb => ../pb
+replace github.com/arbhalerao/cohereDB/pb => ../pb
 
 require (
-	github.com/arbha1erao/cohereDB/pb v0.0.0-00010101000000-000000000000
+	github.com/arbhalerao/cohereDB/pb v0.0.0-00010101000000-000000000000
 	google.golang.org/grpc v1.70.0
 )
 

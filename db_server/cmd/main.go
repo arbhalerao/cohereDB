@@ -8,10 +8,10 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/arbha1erao/cohereDB/db"
-	"github.com/arbha1erao/cohereDB/db_server/db_manager_client"
-	grpc_server "github.com/arbha1erao/cohereDB/db_server/server/grpc"
-	"github.com/arbha1erao/cohereDB/utils"
+	"github.com/arbhalerao/cohereDB/db"
+	"github.com/arbhalerao/cohereDB/db_server/db_manager_client"
+	grpc_server "github.com/arbhalerao/cohereDB/db_server/server/grpc"
+	"github.com/arbhalerao/cohereDB/utils"
 )
 
 type Config struct {

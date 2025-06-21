@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/arbha1erao/cohereDB/db_manager/internal"
-	"github.com/arbha1erao/cohereDB/pb/db_manager"
-	"github.com/arbha1erao/cohereDB/utils"
+	"github.com/arbhalerao/cohereDB/db_manager/internal"
+	"github.com/arbhalerao/cohereDB/pb/db_manager"
+	"github.com/arbhalerao/cohereDB/utils"
 
 	"google.golang.org/grpc"
 )
