@@ -2,4 +2,4 @@
 region = "mumbai"
 http_addr = "127.0.0.1:8081"
 grpc_addr = "127.0.0.1:52001"
-manager_addr = "127.0.0.1:9090"
+manager_addr = "127.0.0.1:8090"
