@@ -13,6 +13,7 @@ replace github.com/arbha1erao/cohereDB/pb => ../pb
 require (
 	github.com/arbha1erao/cohereDB/pb v0.0.0-00010101000000-000000000000
 	github.com/arbha1erao/cohereDB/utils v0.0.0-00010101000000-000000000000
+	github.com/google/uuid v1.6.0
 	google.golang.org/grpc v1.70.0
 )
 

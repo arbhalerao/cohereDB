@@ -8,9 +8,9 @@ import (
 
 type ConsistentHasher struct {
 	mu    sync.RWMutex
-	nodes map[string]struct{} // Stores the actual nodes
-	ring  []uint32            // Sorted list of hash values
-	keys  map[uint32]string   // Hash → Node mapping
+	nodes map[string]struct{}
+	ring  []uint32
+	keys  map[uint32]string
 }
 
 func NewConsistentHasher() *ConsistentHasher {
@@ -21,12 +21,10 @@ func NewConsistentHasher() *ConsistentHasher {
 	}
 }
 
-// hashKey generates a hash value for a given key
 func (h *ConsistentHasher) hashKey(key string) uint32 {
 	return crc32.ChecksumIEEE([]byte(key))
 }
 
-// AddNode adds a new node to the hash ring
 func (h *ConsistentHasher) AddNode(node string) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -41,11 +39,9 @@ func (h *ConsistentHasher) AddNode(node string) {
 	h.keys[hash] = node
 	h.ring = append(h.ring, hash)
 
-	// Keep the ring sorted for efficient lookups
 	sort.Slice(h.ring, func(i, j int) bool { return h.ring[i] < h.ring[j] })
 }
 
-// RemoveNode removes a node from the hash ring
 func (h *ConsistentHasher) RemoveNode(node string) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -59,16 +55,15 @@ func (h *ConsistentHasher) RemoveNode(node string) {
 	hash := h.hashKey(node)
 	delete(h.keys, hash)
 
-	newRing := []uint32{}
-	for _, h := range h.ring {
-		if h != hash {
-			newRing = append(newRing, h)
+	newRing := make([]uint32, 0, len(h.ring)-1)
+	for _, hashVal := range h.ring {
+		if hashVal != hash {
+			newRing = append(newRing, hashVal)
 		}
 	}
 	h.ring = newRing
 }
 
-// GetNode finds the nearest node responsible for the given key
 func (h *ConsistentHasher) GetNode(key string) (string, bool) {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
@@ -79,7 +74,9 @@ func (h *ConsistentHasher) GetNode(key string) (string, bool) {
 
 	hash := h.hashKey(key)
 
-	idx := sort.Search(len(h.ring), func(i int) bool { return h.ring[i] >= hash })
+	idx := sort.Search(len(h.ring), func(i int) bool {
+		return h.ring[i] >= hash
+	})
 
 	if idx == len(h.ring) {
 		idx = 0
@@ -89,7 +86,6 @@ func (h *ConsistentHasher) GetNode(key string) (string, bool) {
 	return node, exists
 }
 
-// Reconcile ensures the hash ring matches the given list of nodes
 func (h *ConsistentHasher) Reconcile(nodes []string) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -101,13 +97,45 @@ func (h *ConsistentHasher) Reconcile(nodes []string) {
 
 	for node := range h.nodes {
 		if _, exists := newNodes[node]; !exists {
-			h.RemoveNode(node)
+			delete(h.nodes, node)
+			hash := h.hashKey(node)
+			delete(h.keys, hash)
+
+			newRing := make([]uint32, 0, len(h.ring)-1)
+			for _, hashVal := range h.ring {
+				if hashVal != hash {
+					newRing = append(newRing, hashVal)
+				}
+			}
+			h.ring = newRing
 		}
 	}
 
 	for node := range newNodes {
 		if _, exists := h.nodes[node]; !exists {
-			h.AddNode(node)
+			h.nodes[node] = struct{}{}
+			hash := h.hashKey(node)
+			h.keys[hash] = node
+			h.ring = append(h.ring, hash)
 		}
 	}
+
+	sort.Slice(h.ring, func(i, j int) bool { return h.ring[i] < h.ring[j] })
+}
+
+func (h *ConsistentHasher) GetNodes() []string {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+
+	nodes := make([]string, 0, len(h.nodes))
+	for node := range h.nodes {
+		nodes = append(nodes, node)
+	}
+	return nodes
+}
+
+func (h *ConsistentHasher) Size() int {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	return len(h.nodes)
 }
