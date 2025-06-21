@@ -1,0 +1,37 @@
+# Build stage
+FROM golang:1.22-alpine AS builder
+
+WORKDIR /app
+
+RUN apk add --no-cache git protobuf protobuf-dev
+
+COPY go.mod go.sum ./
+COPY db_manager/go.mod db_manager/go.sum ./db_manager/
+COPY utils/go.mod utils/go.sum ./utils/
+COPY pb/go.mod pb/go.sum ./pb/
+
+RUN go mod download
+RUN cd db_manager && go mod download
+RUN cd utils && go mod download
+RUN cd pb && go mod download
+
+COPY . .
+
+RUN cd db_manager && go build -o /app/bin/db_manager ./cmd/main.go
+
+FROM alpine:latest
+
+WORKDIR /app
+
+RUN apk add --no-cache ca-certificates curl
+
+COPY --from=builder /app/bin/db_manager /app/db_manager
+
+RUN mkdir -p /app/config /app/logs
+
+EXPOSE 9090 8090
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8090/health || exit 1
+
+CMD ["/app/db_manager", "-config=/app/config/manager.toml"]
