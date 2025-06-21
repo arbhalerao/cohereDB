@@ -19,10 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	DBServer_Set_FullMethodName         = "/pb.DBServer/Set"
-	DBServer_Get_FullMethodName         = "/pb.DBServer/Get"
-	DBServer_Delete_FullMethodName      = "/pb.DBServer/Delete"
-	DBServer_HealthCheck_FullMethodName = "/pb.DBServer/HealthCheck"
+	DBServer_Set_FullMethodName         = "/db_server.DBServer/Set"
+	DBServer_Get_FullMethodName         = "/db_server.DBServer/Get"
+	DBServer_Delete_FullMethodName      = "/db_server.DBServer/Delete"
+	DBServer_HealthCheck_FullMethodName = "/db_server.DBServer/HealthCheck"
 )
 
 // DBServerClient is the client API for DBServer service.
@@ -210,7 +210,7 @@ func _DBServer_HealthCheck_Handler(srv interface{}, ctx context.Context, dec fun
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var DBServer_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "pb.DBServer",
+	ServiceName: "db_server.DBServer",
 	HandlerType: (*DBServerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

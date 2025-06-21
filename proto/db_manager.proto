@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package pb;
+package db_manager;
 
 option go_package = "github.com/arbha1erao/cohereDB/pb/db_manager";
 
@@ -8,9 +8,6 @@ service DBManager {
     rpc Set(SetRequest) returns (SetResponse);
     rpc Get(GetRequest) returns (GetResponse);
     rpc Delete(DeleteRequest) returns (DeleteResponse);
-
-    // rpc RegisterDBServer(RegisterRequest) returns (RegisterResponse);
-    // rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
 }
 
 message SetRequest {
@@ -37,21 +34,3 @@ message DeleteRequest {
 message DeleteResponse {
     bool success = 1;
 }
-
-// message RegisterRequest {
-//     string region = 1;
-//     string http_addr = 2;
-//     string grpc_addr = 3;
-// }
-
-// message RegisterResponse {
-//     bool success = 1;
-// }
-
-// message HeartbeatRequest {
-//     string grpc_addr = 1;
-// }
-
-// message HeartbeatResponse {
-//     bool alive = 1;
-// }
