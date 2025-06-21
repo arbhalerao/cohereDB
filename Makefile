@@ -5,7 +5,6 @@ COHERE_DB_DIR=.
 DB_SERVER_DIR=$(COHERE_DB_DIR)/pb/db_server
 DB_MANAGER_DIR=$(COHERE_DB_DIR)/pb/db_manager
 
-# Generate the db_server code
 generate-db-server:
 	protoc --proto_path=./proto \
 		--go_out=$(DB_SERVER_DIR) \
@@ -25,6 +24,9 @@ generate-db-manager:
 clean:
 	rm -f $(DB_SERVER_DIR)/*.pb.go
 	rm -f $(DB_MANAGER_DIR)/*.pb.go
+	rm -rf bin/
+	rm -rf data/
+	rm -rf logs/
 
 install:
 	go get google.golang.org/protobuf/cmd/protoc-gen-go
@@ -45,7 +47,39 @@ lint:
 
 	@echo "Linting completed!"
 
-# Run all proto generations
+build: generate
+	@echo "Building all CohereDB components..."
+	@mkdir -p bin
+	@echo "Building DB Manager..."
+	@cd db_manager && go build -o ../bin/db_manager ./cmd/main.go
+	@echo "Building DB Server..."
+	@cd db_server && go build -o ../bin/db_server ./cmd/main.go
+	@echo "Building Client..."
+	@cd client && go build -o ../bin/client ./main.go
+	@echo "All components built successfully!"
+
+start: build
+	@echo "Starting CohereDB v1..."
+	@chmod +x scripts/start.sh
+	@./scripts/start.sh
+
+stop:
+	@echo "Stopping CohereDB v1..."
+	@chmod +x scripts/stop.sh
+	@./scripts/stop.sh
+
+test: build start
+	@echo "Testing CohereDB..."
+	@./scripts/test.sh
+
+setup:
+	@echo "Setting up CohereDB development environment..."
+	@mkdir -p bin logs data scripts config
+	@chmod +x scripts/*.sh || true
+	@echo "Development environment ready!"
+
 generate: generate-db-server generate-db-manager
 
-all: generate
+all: generate build
+
+.PHONY: generate-db-server generate-db-manager clean install lint build start stop test setup generate all
