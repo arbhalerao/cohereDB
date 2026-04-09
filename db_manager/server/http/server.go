@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/arbhalerao/cohereDB/db_manager/internal"
-	"github.com/arbhalerao/cohereDB/utils"
+	"github.com/arbhalerao/meerkat/db_manager/internal"
+	"github.com/arbhalerao/meerkat/utils"
 	"github.com/google/uuid"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )

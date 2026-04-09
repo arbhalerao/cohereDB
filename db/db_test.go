@@ -7,7 +7,7 @@ import (
 
 func setupTestDB(t *testing.T) *Database {
 	t.Helper()
-	dir, err := os.MkdirTemp("", "coheredb-test-*")
+	dir, err := os.MkdirTemp("", "meerkat-test-*")
 	if err != nil {
 		t.Fatalf("failed to create temp dir: %v", err)
 	}
@@ -119,7 +119,7 @@ func TestIsHealthy(t *testing.T) {
 }
 
 func TestCleanup(t *testing.T) {
-	dir, _ := os.MkdirTemp("", "coheredb-cleanup-*")
+	dir, _ := os.MkdirTemp("", "meerkat-cleanup-*")
 	db, _ := NewDatabase(dir)
 
 	err := db.Cleanup()

@@ -10,9 +10,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/arbhalerao/cohereDB/db_manager/internal"
-	grpc_server "github.com/arbhalerao/cohereDB/db_manager/server/grpc"
-	"github.com/arbhalerao/cohereDB/utils"
+	"github.com/arbhalerao/meerkat/db_manager/internal"
+	grpc_server "github.com/arbhalerao/meerkat/db_manager/server/grpc"
+	"github.com/arbhalerao/meerkat/utils"
 	"github.com/google/uuid"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -124,7 +124,7 @@ func main() {
 	flag.Parse()
 
 	utils.NewLogger()
-	utils.Logger.Info().Msg("cohereDB manager starting...")
+	utils.Logger.Info().Msg("meerkat manager starting...")
 
 	var config Config
 	err := utils.LoadTomlConfig(&config, *configPath)

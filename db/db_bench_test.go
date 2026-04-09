@@ -8,7 +8,7 @@ import (
 
 func setupBenchDB(b *testing.B) *Database {
 	b.Helper()
-	dir, err := os.MkdirTemp("", "coheredb-bench-*")
+	dir, err := os.MkdirTemp("", "meerkat-bench-*")
 	if err != nil {
 		b.Fatalf("failed to create temp dir: %v", err)
 	}

@@ -539,7 +539,7 @@ const file_db_server_proto_rawDesc = "" +
 	"\x03Get\x12\x15.db_server.GetRequest\x1a\x16.db_server.GetResponse\x12=\n" +
 	"\x06Delete\x12\x18.db_server.DeleteRequest\x1a\x19.db_server.DeleteResponse\x12L\n" +
 	"\vHealthCheck\x12\x1d.db_server.HealthCheckRequest\x1a\x1e.db_server.HealthCheckResponse\x12C\n" +
-	"\bListKeys\x12\x1a.db_server.ListKeysRequest\x1a\x1b.db_server.ListKeysResponseB-Z+github.com/arbhalerao/cohereDB/pb/db_serverb\x06proto3"
+	"\bListKeys\x12\x1a.db_server.ListKeysRequest\x1a\x1b.db_server.ListKeysResponseB-Z+github.com/arbhalerao/meerkat/pb/db_serverb\x06proto3"
 
 var (
 	file_db_server_proto_rawDescOnce sync.Once

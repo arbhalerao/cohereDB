@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/arbhalerao/cohereDB/utils"
+	"github.com/arbhalerao/meerkat/utils"
 )
 
 const (

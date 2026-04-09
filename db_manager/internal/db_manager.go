@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/arbhalerao/cohereDB/pb/db_server"
+	"github.com/arbhalerao/meerkat/pb/db_server"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

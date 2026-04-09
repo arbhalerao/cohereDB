@@ -1,18 +1,18 @@
-module github.com/arbhalerao/cohereDB/db_manager
+module github.com/arbhalerao/meerkat/db_manager
 
 go 1.23.0
 
-replace github.com/arbhalerao/cohereDB/db => ../db
+replace github.com/arbhalerao/meerkat/db => ../db
 
-replace github.com/arbhalerao/cohereDB/utils => ../utils
+replace github.com/arbhalerao/meerkat/utils => ../utils
 
-replace github.com/arbhalerao/cohereDB/config => ../config
+replace github.com/arbhalerao/meerkat/config => ../config
 
-replace github.com/arbhalerao/cohereDB/pb => ../pb
+replace github.com/arbhalerao/meerkat/pb => ../pb
 
 require (
-	github.com/arbhalerao/cohereDB/pb v0.0.0-00010101000000-000000000000
-	github.com/arbhalerao/cohereDB/utils v0.0.0-00010101000000-000000000000
+	github.com/arbhalerao/meerkat/pb v0.0.0-00010101000000-000000000000
+	github.com/arbhalerao/meerkat/utils v0.0.0-00010101000000-000000000000
 	github.com/google/uuid v1.6.0
 	github.com/prometheus/client_golang v1.23.2
 	github.com/rs/zerolog v1.33.0

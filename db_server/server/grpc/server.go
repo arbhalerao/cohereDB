@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/arbhalerao/cohereDB/db"
-	"github.com/arbhalerao/cohereDB/pb/db_server"
-	"github.com/arbhalerao/cohereDB/utils"
+	"github.com/arbhalerao/meerkat/db"
+	"github.com/arbhalerao/meerkat/pb/db_server"
+	"github.com/arbhalerao/meerkat/utils"
 
 	"google.golang.org/grpc"
 )

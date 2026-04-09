@@ -1,9 +1,15 @@
-# cohereDB
+# meerkat
 
-[![CI](https://github.com/arbhalerao/cohereDB/actions/workflows/golangci-lint.yml/badge.svg)](https://github.com/arbhalerao/cohereDB/actions/workflows/golangci-lint.yml)
 [![Go](https://img.shields.io/badge/Go-1.22+-00ADD8?logo=go)](https://go.dev)
 
 A distributed key-value database built in Go, featuring consistent hashing for data distribution, data replication for fault tolerance, automatic key migration on topology changes, and gRPC for inter-node communication.
+
+Named after the meerkat — meerkats live in colonies with designated sentinels that watch over the group, much like this system's manager node that health-checks servers, coordinates the hash ring, and orchestrates key migration when nodes join or leave.
+
+Part of a trilogy of distributed systems projects:
+1. **[walrus](https://github.com/arbhalerao/walrus)** — single-node persistent KV store with WAL
+2. **[meerkat](https://github.com/arbhalerao/meerkat)** — distributed KV with consistent hashing and replication _(you are here)_
+3. **[otter](https://github.com/arbhalerao/otter)** — Raft consensus protocol from scratch
 
 ## Architecture
 
@@ -204,11 +210,11 @@ The manager exposes metrics at `GET /metrics`:
 
 | Metric                              | Type      | Description                                             |
 | ----------------------------------- | --------- | ------------------------------------------------------- |
-| `coheredb_requests_total`           | Counter   | Total requests by operation (get/set/delete) and status |
-| `coheredb_request_duration_seconds` | Histogram | Request latency distribution                            |
-| `coheredb_active_servers`           | Gauge     | Number of live servers in the cluster                   |
-| `coheredb_replication_writes_total` | Counter   | Replication write attempts by status                    |
-| `coheredb_keys_migrated_total`      | Counter   | Keys migrated during node add/remove events             |
+| `meerkat_requests_total`           | Counter   | Total requests by operation (get/set/delete) and status |
+| `meerkat_request_duration_seconds` | Histogram | Request latency distribution                            |
+| `meerkat_active_servers`           | Gauge     | Number of live servers in the cluster                   |
+| `meerkat_replication_writes_total` | Counter   | Replication write attempts by status                    |
+| `meerkat_keys_migrated_total`      | Counter   | Keys migrated during node add/remove events             |
 
 ### Cluster Status
 

@@ -1,11 +1,11 @@
-module github.com/arbhalerao/cohereDB/client
+module github.com/arbhalerao/meerkat/client
 
 go 1.22.0
 
-replace github.com/arbhalerao/cohereDB/pb => ../pb
+replace github.com/arbhalerao/meerkat/pb => ../pb
 
 require (
-	github.com/arbhalerao/cohereDB/pb v0.0.0-00010101000000-000000000000
+	github.com/arbhalerao/meerkat/pb v0.0.0-00010101000000-000000000000
 	google.golang.org/grpc v1.70.0
 )
 

@@ -9,11 +9,11 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/arbhalerao/cohereDB/db"
-	"github.com/arbhalerao/cohereDB/db_server/db_manager_client"
-	grpc_server "github.com/arbhalerao/cohereDB/db_server/server/grpc"
-	http_server "github.com/arbhalerao/cohereDB/db_server/server/http"
-	"github.com/arbhalerao/cohereDB/utils"
+	"github.com/arbhalerao/meerkat/db"
+	"github.com/arbhalerao/meerkat/db_server/db_manager_client"
+	grpc_server "github.com/arbhalerao/meerkat/db_server/server/grpc"
+	http_server "github.com/arbhalerao/meerkat/db_server/server/http"
+	"github.com/arbhalerao/meerkat/utils"
 )
 
 type Config struct {
@@ -31,7 +31,7 @@ func main() {
 	flag.Parse()
 
 	utils.NewLogger()
-	utils.Logger.Info().Msg("cohereDB server starting...")
+	utils.Logger.Info().Msg("meerkat server starting...")
 
 	var config Config
 	err := utils.LoadTomlConfig(&config, *configPath)

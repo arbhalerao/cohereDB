@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/arbhalerao/cohereDB/utils"
+	"github.com/arbhalerao/meerkat/utils"
 	"github.com/dgraph-io/badger"
 )
 

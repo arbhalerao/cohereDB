@@ -17,7 +17,7 @@ services:
       timeout: 10s
       retries: 3
     networks:
-      - coheredb
+      - meerkat
 
   db_server_pune:
     build:
@@ -36,7 +36,7 @@ services:
       db_manager:
         condition: service_healthy
     networks:
-      - coheredb
+      - meerkat
 
   db_server_mumbai:
     build:
@@ -55,7 +55,7 @@ services:
       db_manager:
         condition: service_healthy
     networks:
-      - coheredb
+      - meerkat
 
   db_server_bangalore:
     build:
@@ -74,10 +74,10 @@ services:
       db_manager:
         condition: service_healthy
     networks:
-      - coheredb
+      - meerkat
 
 networks:
-  coheredb:
+  meerkat:
     driver: bridge
 
 volumes:

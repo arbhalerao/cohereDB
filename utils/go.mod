@@ -1,4 +1,4 @@
-module github.com/arbhalerao/cohereDB/utils
+module github.com/arbhalerao/meerkat/utils
 
 go 1.22.0
 
